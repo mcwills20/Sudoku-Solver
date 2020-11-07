@@ -1,3 +1,6 @@
+import pandas as pd
+
+
 class box(object):
 
     def __init__(self, value, row, column):
@@ -60,3 +63,22 @@ class box(object):
 
             self.possible[self.value] = True
 
+def build_puzzle(raw):
+    # cast the raw data (which should be a string of numbers with no delimination) into a list for easier sorting
+    _lis = list(str(raw))
+    # initialize a temporary formatted list. 9 Lists (the rows) of 9 numbers each will be put into this list
+    _formattedlis = []
+    for i in range(0,81,9):
+        _formattedlis.append(_lis[i:i+9])
+
+    # use the formatted puzzle to create a list of box objects
+    _finallis = []
+    for rownum, row in enumerate(_formattedlis):
+        _row = []
+        for colnum, val in enumerate(row):
+            _row.append(box(int(val), rownum, colnum))
+        _finallis.append(_row)
+    
+    # use the final list to return a pandas dataframe with the box objects
+
+    return pd.DataFrame(_finallis)
