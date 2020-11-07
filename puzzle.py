@@ -51,22 +51,26 @@ class Box(object):
                 return 8
 
     def init_possible(self):
-        self.possible = dict()
         if self.value == 0:
             self.solved = False
-            for i in range(1, 10):
-                self.possible[i] = True
+            self.possible = [i for i in range(1, 10)]
         else:
             self.solved = True
-            for i in range(1, 10):
-                self.possible[i] = False
+            self.possible = [self.value]
 
-            self.possible[self.value] = True
+    def assign_possible(self, found):
+        for val in found:
+            if val in self.possible:
+                self.possible.remove(val)
 
-    def simple_check(self, sudoku):
-        check_row(self, sudoku)
-        check_column(self, sudoku)
-        check_quad(self, sudoku)
+        self.check_solved()
+
+    def check_solved(self):
+
+        if len(self.possible) == 1:
+            self.solved = True
+            self.value = self.possible[0]
+            print(self.row +','+self.column+' has been solved as '+self.value)
 
 
 def build_sudoku(raw):
@@ -84,15 +88,3 @@ def build_sudoku(raw):
 
     # use the final list to return a pandas dataframe with the box objects
     return pd.DataFrame(_formattedlis)
-
-
-def check_row(box, sudoku):
-    pass
-
-
-def check_column(box, sudoku):
-    pass
-
-
-def check_quad(box, sudoku):
-    pass
