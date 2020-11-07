@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-class box(object):
+class Box(object):
 
     def __init__(self, value, row, column):
         self.value = value
@@ -9,15 +9,15 @@ class box(object):
         self.column = column
 
         # Get what quadrant the block is in. Useful for checking later
-        self.quad = self.getquad()
+        self.quad = self.get_quad()
         # Initialize the possible dict
-        self.initpossible()
+        self.init_possible()
 
     # When printing, display the value
     def __repr__(self):
         return str(self.value)
 
-    def getquad(self):
+    def get_quad(self):
 
         if self.row <= 2:
             # Upper left
@@ -50,19 +50,26 @@ class box(object):
             else:
                 return 8
 
-    def initpossible(self):
+    def init_possible(self):
         self.possible = dict()
         if self.value == 0:
+            self.solved = False
             for i in range(1, 10):
                 self.possible[i] = True
         else:
+            self.solved = True
             for i in range(1, 10):
                 self.possible[i] = False
 
             self.possible[self.value] = True
 
+    def simple_check(self, sudoku):
+        check_row(self, sudoku)
+        check_column(self, sudoku)
+        check_quad(self, sudoku)
 
-def build_puzzle(raw):
+
+def build_sudoku(raw):
     # cast the raw data (which should be a string of numbers with no delimination) into a list for easier sorting
     _lis = list(raw)
     # initialize a temporary formatted list. 9 Lists (the rows) of 9 numbers each will be put into this list
@@ -73,7 +80,19 @@ def build_puzzle(raw):
     # covert the lists from the raw values into the box object types
     for rownum, row in enumerate(_formattedlis):
         for colnum, val in enumerate(row):
-            _formattedlis[rownum][colnum] = box(int(val), rownum, colnum)
+            _formattedlis[rownum][colnum] = Box(int(val), rownum, colnum)
 
     # use the final list to return a pandas dataframe with the box objects
     return pd.DataFrame(_formattedlis)
+
+
+def check_row(box, sudoku):
+    pass
+
+
+def check_column(box, sudoku):
+    pass
+
+
+def check_quad(box, sudoku):
+    pass
