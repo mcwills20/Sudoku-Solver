@@ -9,7 +9,7 @@ class Box(object):
         self.column = column
 
         # Get what quadrant the block is in. Useful for checking later
-        self.quad = self.get_quad()
+        self.quad = self.init_quad()
         # Initialize the possible dict
         self.init_possible()
 
@@ -17,7 +17,7 @@ class Box(object):
     def __repr__(self):
         return str(self.value)
 
-    def get_quad(self):
+    def init_quad(self):
 
         if self.row <= 2:
             # Upper left
