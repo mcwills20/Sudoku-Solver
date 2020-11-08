@@ -76,3 +76,37 @@ def check_values(df):
             found.append(box.value)
 
     return found
+
+
+# Intermediate checks will check the possible values of the boxes in a region
+# If only one box in a region has a specfic possible value, that can be considered solved
+def intermediate_check_row(rownum, sudoku):
+
+    # Perform a basic check to update possible values
+    _found = check_values(sudoku.loc[rownum])
+
+    for box in sudoku.loc[rownum]:
+        if not box.solved:
+            # Create a temporary list of possible values to check for
+            _possible = box.possible.copy()
+            # Remove any found values from temporary list
+            for val in _found:
+                if val in _possible:
+                    _possible.remove(val)
+
+            # Loop through the other boxes in the row to find their possible values
+            for checkbox in sudoku.loc[rownum]:
+                # Only check if the box isn't solved and it isn't the box we are comparing to
+                if not checkbox.solved and box != checkbox:
+                    # Loop through all the possible values in the check box
+                    for _pos in checkbox.possible:
+                        # If we find a value that is in the source, remove it
+                        if _pos in _possible:
+                            _possible.remove(_pos)
+
+            # If there is only one possible solution left, that must be the solution for this box.
+            if len(_possible) == 1:
+                box.possible = _possible
+                box.check_solved()
+
+    return sudoku
