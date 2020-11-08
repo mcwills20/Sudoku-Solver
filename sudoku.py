@@ -14,14 +14,32 @@ df = puzzle.build_sudoku(
 print("Inital sudoku is")
 print(df)
 
-# Do a first pass with the simple check algorithms
+# Do a first pass with the basic check algorithms
 for i in range(9):
-    df = solve.check_row(i, df)
-    df = solve.check_column(i, df)
-    df = solve.check_quad(i, df)
+    df = solve.bas_check_row(i, df)
+    df = solve.bas_check_column(i, df)
+    df = solve.bas_check_quad(i, df)
 
 # Print the results
 print("After one pass")
+print(df)
+
+print("Performing intermediate checks")
+
+print("Checking rows")
+for i in range(9):
+    df = solve.int_check_row(i, df)
+
+print("Checking Columns")
+for i in range(9):
+    df = solve.int_check_column(i, df)
+
+
+print("Check Quadrants")
+for i in range(9):
+     df = solve.int_check_quad(i, df)
+
+print("After intermediate check")
 print(df)
 
 # Build the solution to double check. TO DO: Automatic verifier
