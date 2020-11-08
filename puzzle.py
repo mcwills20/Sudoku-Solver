@@ -22,33 +22,33 @@ class Box(object):
         if self.row <= 2:
             # Upper left
             if self.column <= 2:
-                return 1
+                return 0
             # Upper Right
             elif self.column >= 6:
-                return 3
+                return 2
             # Upper Middle
             else:
-                return 2
+                return 1
         elif self.row >= 6:
             # Middle Left
             if self.column <= 2:
-                return 4
+                return 3
             # Middle Right
             elif self.column >= 6:
-                return 6
+                return 5
             # True Middle
             else:
-                return 5
+                return 4
         else:
             # Lower Left
             if self.column <= 2:
-                return 7
+                return 6
             # Lower Right
             elif self.column >= 6:
-                return 9
+                return 8
             # Lower Middle
             else:
-                return 8
+                return 7
 
     def init_possible(self):
         if self.value == 0:
@@ -70,7 +70,8 @@ class Box(object):
         if len(self.possible) == 1:
             self.solved = True
             self.value = self.possible[0]
-            print(self.row +','+self.column+' has been solved as '+self.value)
+            print(str(self.row) + ','+str(self.column) +
+                  ' has been solved as '+str(self.value))
 
 
 def build_sudoku(raw):
