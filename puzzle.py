@@ -58,20 +58,24 @@ class Box(object):
             self.solved = True
             self.possible = [self.value]
 
-    def assign_possible(self, found):
+    def assign_possible(self, found, change):
         for val in found:
             if val in self.possible:
                 self.possible.remove(val)
 
-        self.check_solved()
+        change = self.check_solved(change)
+        return change
 
-    def check_solved(self):
+    def check_solved(self, change):
 
         if len(self.possible) == 1:
             self.solved = True
             self.value = self.possible[0]
+            change = True
             print(str(self.row) + ','+str(self.column) +
                   ' has been solved as '+str(self.value))
+        return change    
+        
 
 
 def build_sudoku(raw):
