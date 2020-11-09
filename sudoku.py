@@ -8,42 +8,32 @@ reload(solve)
 
 # This file is the current testing ground. Will be staging point for final algorithm
 
-df = puzzle.build_sudoku(
-    "004300209005009001070060043006002087190007400050083000600000105003508690042910300")
-
-print("Inital sudoku is")
-print(df)
-
-# Do a first pass with the basic check algorithms
-for i in range(9):
-    df = solve.bas_check_row(i, df)
-    df = solve.bas_check_column(i, df)
-    df = solve.bas_check_quad(i, df)
-
-# Print the results
-print("After one pass")
-print(df)
-
-print("Performing intermediate checks")
-
-print("Checking rows")
-for i in range(9):
-    df = solve.int_check_row(i, df)
-
-print("Checking Columns")
-for i in range(9):
-    df = solve.int_check_column(i, df)
-
-
-print("Check Quadrants")
-for i in range(9):
-     df = solve.int_check_quad(i, df)
-
-print("After intermediate check")
-print(df)
+sudoku = puzzle.build_sudoku(
+    "040100050107003960520008000000000017000906800803050620090060543600080700250097100")
 
 # Build the solution to double check. TO DO: Automatic verifier
-solved = puzzle.build_sudoku(
-    "864371259325849761971265843436192587198657432257483916689734125713528694542916378")
-print("The solved puzzle should be")
-print(solved)
+solution = puzzle.build_sudoku(
+    "346179258187523964529648371965832417472916835813754629798261543631485792254397186")
+
+print("Inital sudoku is")
+print(sudoku)
+
+change = True
+
+while change:
+    change = False
+    sudoku, change = solve.basic_check(sudoku, change)
+
+    if not change:
+        sudoku, change = solve.intermediate_check(sudoku, change)
+
+    if solve.validate_answer(sudoku):
+        change = False
+        print("Solve completed successfully")
+        print(sudoku)
+
+if not solve.validate_answer(sudoku):
+    print("Solve Failed")
+    print(sudoku)
+    print("Correct answer was")
+    print(solution)
