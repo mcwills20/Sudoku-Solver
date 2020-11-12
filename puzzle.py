@@ -80,16 +80,16 @@ class Box(object):
 
 def build_sudoku(raw):
     # cast the raw data (which should be a string of numbers with no delimination) into a list for easier sorting
-    _lis = list(raw)
+    lis = list(raw)
     # initialize a temporary formatted list. 9 Lists (the rows) of 9 numbers each will be put into this list
-    _formattedlis = []
+    formattedlis = []
     for i in range(0, 81, 9):
-        _formattedlis.append(_lis[i:i+9])
+        formattedlis.append(lis[i:i+9])
 
     # covert the lists from the raw values into the box object types
-    for rownum, row in enumerate(_formattedlis):
+    for rownum, row in enumerate(formattedlis):
         for colnum, val in enumerate(row):
-            _formattedlis[rownum][colnum] = Box(int(val), rownum, colnum)
+            formattedlis[rownum][colnum] = Box(int(val), rownum, colnum)
 
     # use the final list to return a pandas dataframe with the box objects
-    return pd.DataFrame(_formattedlis)
+    return pd.DataFrame(formattedlis)

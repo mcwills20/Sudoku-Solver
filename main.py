@@ -22,10 +22,10 @@ change = True
 
 while change:
     change = False
-    sudoku, change = solve.basic_check(sudoku, change)
+    change = solve.basic_check(sudoku, change)
 
     if not change:
-        sudoku, change = solve.intermediate_check(sudoku, change)
+        change = solve.intermediate_check(sudoku, change)
 
     if solve.validate_answer(sudoku):
         change = False
