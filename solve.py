@@ -8,11 +8,11 @@ from puzzle import Box
 def basic_check(sudoku, baschange):
     
     for i in range(9):
-        sudoku, baschange = bas_check_row(i, sudoku, baschange)
+        baschange = bas_check_row(i, sudoku, baschange)
     for i in range(9):
-        sudoku, baschange = bas_check_column(i, sudoku, baschange)
+        baschange = bas_check_column(i, sudoku, baschange)
     for i in range(9):
-        sudoku, baschange = bas_check_quad(i, sudoku, baschange)
+        baschange = bas_check_quad(i, sudoku, baschange)
     
     return sudoku, baschange
 
@@ -26,36 +26,36 @@ def bas_check_row(rownum, sudoku, baschange):
         if not box.solved:
             baschange = box.assign_possible(_found, baschange)
 
-    return sudoku, baschange
+    return baschange
 
 
 def bas_check_column(colnum, sudoku, baschange):
 
     # Check which values exist in the column
-    _found = check_values(sudoku.loc[:, colnum])
+    found = check_values(sudoku.loc[:, colnum])
 
     # Assign the possible values. Found values cannot be possible
     for box in sudoku.loc[:, colnum]:
         if not box.solved:
-            baschange = box.assign_possible(_found, baschange)
+            baschange = box.assign_possible(found, baschange)
 
-    return sudoku, baschange
+    return baschange
 
 
 def bas_check_quad(quad, sudoku, baschange):
     # Slice the board into the correct quadrant
-    _quadrant = get_quad(quad, sudoku)
+    quadrant = get_quad(quad, sudoku)
     
     # Check which values exist in the quadrant
-    _found = check_values_quad(_quadrant)
+    found = check_values_quad(quadrant)
     
     # Assign the possible values. Found values cannot be possible
-    for _row in _quadrant.itertuples(index=False):
-        for box in _row:
+    for row in quadrant.itertuples(index=False):
+        for box in row:
             if not box.solved:
-                baschange = box.assign_possible(_found, baschange)
+                baschange = box.assign_possible(found, baschange)
 
-    return sudoku, baschange
+    return baschange
 
 # Intermediate checks will check the possible values of the boxes in a region
 # If only one box in a region has a specfic possible value, that can be considered solved
@@ -63,115 +63,115 @@ def bas_check_quad(quad, sudoku, baschange):
 def intermediate_check(sudoku, intchange):
 
     for i in range(9):
-        sudoku, intchange = int_check_row(i, sudoku, intchange)
+        intchange = int_check_row(i, sudoku, intchange)
     for i in range(9):
-        sudoku, intchange = int_check_column(i, sudoku, intchange)
+        intchange = int_check_column(i, sudoku, intchange)
     for i in range(9):
-        sudoku, intchange = int_check_quad(i, sudoku, intchange)
+        intchange = int_check_quad(i, sudoku, intchange)
 
-    return sudoku, intchange
+    return intchange
 
 def int_check_row(rownum, sudoku, intchange):
 
     # Perform a basic check to update possible values
-    _found = check_values(sudoku.loc[rownum])
+    found = check_values(sudoku.loc[rownum])
 
     for box in sudoku.loc[rownum]:
         if not box.solved:
             # Create a temporary list of possible values to check for
-            _possible = box.possible.copy()
+            possible = box.possible.copy()
             # Remove any found values from temporary list
-            for val in _found:
-                if val in _possible:
-                    _possible.remove(val)
+            for val in found:
+                if val in possible:
+                    possible.remove(val)
 
             # Loop through the other boxes in the row to find their possible values
             for checkbox in sudoku.loc[rownum]:
                 # Only check if the box isn't solved and it isn't the box we are comparing to
                 if not checkbox.solved and box != checkbox:
                     # Loop through all the possible values in the check box
-                    for _pos in checkbox.possible:
+                    for pos in checkbox.possible:
                         # If we find a value that is in the source, remove it
-                        if _pos in _possible:
-                            _possible.remove(_pos)
+                        if pos in possible:
+                            possible.remove(pos)
 
             # If there is only one possible solution left, that must be the solution for this box.
-            if len(_possible) == 1:
-                box.possible = _possible.copy()
+            if len(possible) == 1:
+                box.possible = possible.copy()
                 intchange = box.check_solved(intchange)
 
-    return sudoku, intchange
+    return intchange
 
 
 def int_check_column(colnum, sudoku, intchange):
 
     # Perform a basic check to update possible values
-    _found = check_values(sudoku.loc[:, colnum])
+    found = check_values(sudoku.loc[:, colnum])
 
     for box in sudoku.loc[:, colnum]:
         if not box.solved:
             # Create a temporary list of possible values to check for
-            _possible = box.possible.copy()
+            possible = box.possible.copy()
             # Remove any found values from temporary list
-            for val in _found:
-                if val in _possible:
-                    _possible.remove(val)
+            for val in found:
+                if val in possible:
+                    possible.remove(val)
 
             # Loop through the other boxes in the column to find their possible values
             for checkbox in sudoku.loc[:, colnum]:
                 # Only check if the box isn't solved and it isn't the box we are comparing to
                 if not checkbox.solved and box != checkbox:
                     # Loop through all the possible values in the check box
-                    for _pos in checkbox.possible:
+                    for pos in checkbox.possible:
                         # If we find a value that is in the source, remove it
-                        if _pos in _possible:
-                            _possible.remove(_pos)
+                        if pos in possible:
+                            possible.remove(pos)
 
             # If there is only one possible solution left, that must be the solution for this box.
-            if len(_possible) == 1:
-                box.possible = _possible.copy()
+            if len(possible) == 1:
+                box.possible = possible.copy()
                 intchange = box.check_solved(intchange)
 
-    return sudoku, intchange
+    return intchange
 
 
 def int_check_quad(quad, sudoku, intchange):
 
     # Slice the board into the correct quadrant
-    _quadrant = get_quad(quad, sudoku)
+    quadrant = get_quad(quad, sudoku)
 
     # Perform a basic check to update possible values
-    _found = check_values_quad(_quadrant)
+    found = check_values_quad(quadrant)
 
     # Start checking the boxes in the quadrant
-    for _row in _quadrant.itertuples(index=False):
-        for box in _row:
+    for row in quadrant.itertuples(index=False):
+        for box in row:
             if not box.solved:
                 # Create a tempoarty list of possible values to check for
-                _possible = box.possible.copy()
+                possible = box.possible.copy()
                 # Remove any found values from temporary list
-                for val in _found:
-                    if val in _possible:
-                        _possible.remove(val)
+                for val in found:
+                    if val in possible:
+                        possible.remove(val)
                 
                 #Loop through the other boxes in the quardrant to find their possible values
-                for _checkrow in _quadrant.itertuples(index=False):
+                for checkrow in quadrant.itertuples(index=False):
                     # Only check if the box isn't solved and it isn't the box we are comparing to
-                    for checkbox in _checkrow:
+                    for checkbox in checkrow:
                         
                         # Only check if the box isn't solved and it isn't the box we are comparing to
                         if not checkbox.solved and box != checkbox:
-                            for _pos in checkbox.possible:
+                            for pos in checkbox.possible:
                                 # If there is a value that is in the source possible list, remove it
-                                if _pos in _possible:
-                                    _possible.remove(_pos)
+                                if pos in possible:
+                                    possible.remove(pos)
                 
                 #If there is only one possible solution left, that must be the solution for this box
-                if len(_possible) == 1:
-                    box.possible = _possible.copy()
+                if len(possible) == 1:
+                    box.possible = possible.copy()
                     intchange = box.check_solved(intchange)
 
-    return sudoku, intchange
+    return intchange
 
 # Function to check the solved values in a row or column
 def check_values(region):
@@ -186,8 +186,8 @@ def check_values(region):
 # Function to check the solved values in a quadrant
 def check_values_quad(quadrant):
     found =  []
-    for _row in quadrant.itertuples(index=False):
-        for box in _row:
+    for row in quadrant.itertuples(index=False):
+        for box in row:
             if box.value != 0:
                 found.append(box.value)
 
@@ -240,8 +240,8 @@ def validate_answer(sudoku):
 def validate_rows(sudoku, solved):
 
     for rownum in range(9):
-        _found = check_values(sudoku.loc[rownum])
-        if len(_found) != 9:
+        found = check_values(sudoku.loc[rownum])
+        if len(found) != 9:
             solved = False
     
     return solved
@@ -249,8 +249,8 @@ def validate_rows(sudoku, solved):
 def validate_columns(sudoku, solved):
 
     for colnum in range(9):
-        _found = check_values(sudoku.loc[:,colnum])
-        if len(_found) != 9:
+        found = check_values(sudoku.loc[:,colnum])
+        if len(found) != 9:
             solved = False
     
     return solved
@@ -258,9 +258,9 @@ def validate_columns(sudoku, solved):
 def validate_quadrants(sudoku, solved):
 
     for quad in range(9):
-        _quadrant = get_quad(quad, sudoku)
-        _found = check_values_quad(_quadrant)
-        if len(_found) != 9:
+        quadrant = get_quad(quad, sudoku)
+        found = check_values_quad(quadrant)
+        if len(found) != 9:
             solved = False
     
     return solved
