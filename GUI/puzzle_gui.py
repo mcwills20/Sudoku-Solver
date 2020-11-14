@@ -72,14 +72,13 @@ class Box(object):
             self.solved = True
             self.value = self.possible[0]
             change = True
-            print(str(self.row) + ','+str(self.column) +
-                  ' has been solved as '+str(self.value))
 
             # Update the gui
             ind = convert_index(self.row, self.column)
+            gui.button_list[ind].background_color = [0, 1, 0, 1]
             gui.button_list[ind].text = str(self.value)
-        return change    
-        
+
+        return change
 
 
 def build_sudoku(raw):
@@ -97,6 +96,7 @@ def build_sudoku(raw):
 
     # use the final list to return a pandas dataframe with the box objects
     return pd.DataFrame(formattedlis)
+
 
 def convert_index(rownum, colnum):
     index = -((rownum * 9) + colnum + 1)
