@@ -9,11 +9,7 @@ reload(solve)
 # This file is the current testing ground. Will be staging point for final algorithm
 
 sudoku = puzzle.build_sudoku(
-    "040100050107003960520008000000000017000906800803050620090060543600080700250097100")
-
-# Build the solution to double check. TO DO: Automatic verifier
-solution = puzzle.build_sudoku(
-    "346179258187523964529648371965832417472916835813754629798261543631485792254397186")
+    "200000001003060008807031940002506070409800056100000380038670500705090263000004000")
 
 print("Inital sudoku is")
 print(sudoku)
@@ -35,5 +31,3 @@ while change:
 if not solve.validate_answer(sudoku):
     print("Solve Failed")
     print(sudoku)
-    print("Correct answer was")
-    print(solution)
