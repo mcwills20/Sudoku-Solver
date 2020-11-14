@@ -13,7 +13,8 @@ from kivy.properties import ListProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 
-
+def testing(gui):
+    print(gui.button_list[-2].text)
 
 
 class SudokuPy(App):
@@ -43,9 +44,11 @@ class SudokuPy(App):
     
     def solve_sudoku(self, event):
         _change = False
-        _change = solve_gui.basic_check(self, sudoku, _change)
+        _change = solve_gui.basic_check(self, self.sudoku, _change)
         print(sudoku)
 
+    def test(self, event):
+        testing(self)
 
 sudoku = puzzle_gui.build_sudoku(
     "040100050107003960520008000000000017000906800803050620090060543600080700250097100")

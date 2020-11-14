@@ -58,15 +58,15 @@ class Box(object):
             self.solved = True
             self.possible = [self.value]
 
-    def assign_possible(self, found, change):
+    def assign_possible(self, gui, found, change):
         for val in found:
             if val in self.possible:
                 self.possible.remove(val)
 
-        change = self.check_solved(change)
+        change = self.check_solved(gui, change)
         return change
 
-    def check_solved(self, change):
+    def check_solved(self, gui, change):
 
         if len(self.possible) == 1:
             self.solved = True
@@ -74,6 +74,10 @@ class Box(object):
             change = True
             print(str(self.row) + ','+str(self.column) +
                   ' has been solved as '+str(self.value))
+
+            # Update the gui
+            ind = convert_index(self.row, self.column)
+            gui.button_list[ind].text = str(self.value)
         return change    
         
 
@@ -93,3 +97,7 @@ def build_sudoku(raw):
 
     # use the final list to return a pandas dataframe with the box objects
     return pd.DataFrame(formattedlis)
+
+def convert_index(rownum, colnum):
+    index = -((rownum * 9) + colnum + 1)
+    return index
