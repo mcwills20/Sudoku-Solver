@@ -61,7 +61,12 @@ class SudokuPy(App):
         if not _change:
             if solve_gui.validate_answer(self, sudoku):
                 self.on_complete()
-            self.basicsolve.cancel()
+                self.basicsolve.cancel()
+            else:
+                _change = solve_gui.intermediate_check(self, self.sudoku, _change)
+                if not _change:
+                    self.on_fail()
+                    self.basicsolve.cancel()
 
     def clear_format(self):
         _color = [1, 1, 1, 1]
@@ -73,9 +78,14 @@ class SudokuPy(App):
             box.background_color = [0, 1, 0, 1]
         self.textinput.text = 'SOLVED'
 
+    def on_fail(self):
+        for box in self.button_list:
+            box.background_color = [1, 0, 0, 1]
+        self.textinput.text = 'FAILED'
 
+        
 sudoku = puzzle_gui.build_sudoku(
-    "040100050107003960520008000000000017000906800803050620090060543600080700250097100")
+    "200000001003060008807031940002506070409800056100000380038670500705090263000004000")
 
 if __name__ == '__main__':
     SudokuPy(sudoku).run()

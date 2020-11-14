@@ -80,10 +80,16 @@ def intermediate_check(gui, sudoku, intchange):
 
     for i in range(9):
         intchange = int_check_row(gui, i, sudoku, intchange)
+        if intchange:
+            return intchange
     for i in range(9):
         intchange = int_check_column(gui, i, sudoku, intchange)
+        if intchange:
+            return intchange
     for i in range(9):
         intchange = int_check_quad(gui, i, sudoku, intchange)
+        if intchange:
+            return intchange
 
     return intchange
 
@@ -116,6 +122,8 @@ def int_check_row(gui, rownum, sudoku, intchange):
             if len(possible) == 1:
                 box.possible = possible.copy()
                 intchange = box.check_solved(gui, intchange)
+                if intchange:
+                        return intchange
 
     return intchange
 
@@ -148,6 +156,8 @@ def int_check_column(gui, colnum, sudoku, intchange):
             if len(possible) == 1:
                 box.possible = possible.copy()
                 intchange = box.check_solved(gui, intchange)
+                if intchange:
+                        return intchange
 
     return intchange
 
@@ -187,6 +197,8 @@ def int_check_quad(gui, quad, sudoku, intchange):
                 if len(possible) == 1:
                     box.possible = possible.copy()
                     intchange = box.check_solved(gui, intchange)
+                    if intchange:
+                        return intchange
 
     return intchange
 
