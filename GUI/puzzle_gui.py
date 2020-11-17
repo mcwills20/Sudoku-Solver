@@ -75,8 +75,8 @@ class Box(object):
 
             # Update the gui
             ind = convert_index(self.row, self.column)
-            gui.button_list[ind].background_color = [0, 1, 0, 1]
-            gui.button_list[ind].text = str(self.value)
+            gui.cell_list[ind].background_color = [0, 1, 0, 1]
+            gui.cell_list[ind].text = str(self.value)
 
         return change
 

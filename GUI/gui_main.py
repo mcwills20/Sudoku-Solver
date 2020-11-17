@@ -12,6 +12,9 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.clock import Clock
 
+class SudokuCell(Button):
+    def __init__(self, **kwargs):
+        super(SudokuCell, self).__init__(**kwargs)
 
 class SudokuPy(App):
 
@@ -29,12 +32,12 @@ class SudokuPy(App):
         for rownum in range(9):
             for box in sudoku.loc[rownum]:
                 if box.value != 0:
-                    puzzle.add_widget(Button(text=str(box.value)))
+                    puzzle.add_widget(SudokuCell(text=str(box.value)))
                 else:
-                    puzzle.add_widget(Button(text=''))
+                    puzzle.add_widget(SudokuCell(text=''))
 
-        # Store a reference to the buttons for easy manipulation later
-        self.button_list = puzzle.children
+        # Store a reference to the cells for easy manipulation later
+        self.cell_list = puzzle.children
 
         # Build the window
         root_widget.add_widget(TextInput(text='Sudoku', size_hint_y=1))
@@ -70,16 +73,16 @@ class SudokuPy(App):
 
     def clear_format(self):
         _color = [1, 1, 1, 1]
-        for box in self.button_list:
+        for box in self.cell_list:
             box.background_color = _color
 
     def on_complete(self):
-        for box in self.button_list:
+        for box in self.cell_list:
             box.background_color = [0, 1, 0, 1]
         self.textinput.text = 'SOLVED'
 
     def on_fail(self):
-        for box in self.button_list:
+        for box in self.cell_list:
             box.background_color = [1, 0, 0, 1]
         self.textinput.text = 'FAILED'
 
