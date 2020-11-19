@@ -31,6 +31,7 @@ class SudokuCell(GridLayout):
             self.update_possible()
             self.ids.pos5.text = str(value)
             self.ids.pos5.font_size = 25
+            self.ids.pos5.color = [0,0,0,1]
 
     def update_possible(self):
 
