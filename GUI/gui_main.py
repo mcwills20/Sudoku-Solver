@@ -24,6 +24,7 @@ class SudokuCell(GridLayout):
         if value == 0:
 
             self.possible = possible
+            self.update_possible()
 
         else:
             self.possible = []
@@ -158,8 +159,10 @@ class SudokuPy(App):
         self.textinput.text = 'FAILED'
 
 
+
 sudoku = puzzle_gui.build_sudoku(
     "200000001003060008807031940002506070409800056100000380038670500705090263000004000")
 
 if __name__ == '__main__':
     SudokuPy(sudoku).run()
+

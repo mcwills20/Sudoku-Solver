@@ -2,9 +2,17 @@
 
 <SudokuCell>:
 
-   
+    canvas.before:
+        Color:
+            rgba: 0, 0, 1, 1
+        Rectangle:
+            size: self.size
+            pos: self.pos
+        
+
     cols: 3
     id: possible
+    spacing: 0
 
     Label:
         id: pos1
@@ -48,4 +56,5 @@
         Rectangle:
             pos: self.pos
             size: self.size
-            source: "GUI\\grid.png"
+    
+    spacing: 5
