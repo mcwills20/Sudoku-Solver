@@ -14,9 +14,12 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.clock import Clock
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.properties import StringProperty
+from kivy.properties import ListProperty
 
 
 class SudokuCell(GridLayout):
+
+    color = ListProperty([1, 1, 1, 1])
 
     def __init__(self, value, possible, **kwargs):
         super(SudokuCell, self).__init__(**kwargs)
@@ -24,16 +27,15 @@ class SudokuCell(GridLayout):
         if value == 0:
 
             self.possible = possible
-            self.update_possible()
 
         else:
-            self.possible = []
-            self.update_possible()
-            self.ids.pos5.text = str(value)
-            self.ids.pos5.font_size = 25
-            self.ids.pos5.color = [0,0,0,1]
+            self.update_solution(value)
+            # Turn the background color back to white
+            self.color = [1, 1, 1, 1]
 
-    def update_possible(self):
+    def update_possible(self, possible):
+
+        self.possible = possible
 
         if 1 in self.possible:
             self.ids.pos1.text = '1'
@@ -79,6 +81,14 @@ class SudokuCell(GridLayout):
             self.ids.pos9.text = '9'
         else:
             self.ids.pos9.text = ''
+
+    def update_solution(self, value):
+        self.possible = []
+        self.update_possible(self.possible)
+        self.ids.pos5.text = str(value)
+        self.ids.pos5.font_size = 25
+        self.ids.pos5.color = [0, 0, 0, 1]
+        self.color = [0, 1, 0, 1]
 
 
 class SudokuGrid(GridLayout):
@@ -146,19 +156,18 @@ class SudokuPy(App):
 
     def clear_format(self):
         _color = [1, 1, 1, 1]
-        for box in self.cell_list:
-            box.background_color = _color
+        for cell in self.cell_list:
+            cell.color = _color
 
     def on_complete(self):
-        for box in self.cell_list:
-            box.background_color = [0, 1, 0, 1]
+        for cell in self.cell_list:
+            cell.color = [0, 1, 0, 1]
         self.textinput.text = 'SOLVED'
 
     def on_fail(self):
-        for box in self.cell_list:
-            box.background_color = [1, 0, 0, 1]
+        for cell in self.cell_list:
+            cell.color = [1, 0, 0, 1]
         self.textinput.text = 'FAILED'
-
 
 
 sudoku = puzzle_gui.build_sudoku(
@@ -166,4 +175,3 @@ sudoku = puzzle_gui.build_sudoku(
 
 if __name__ == '__main__':
     SudokuPy(sudoku).run()
-
