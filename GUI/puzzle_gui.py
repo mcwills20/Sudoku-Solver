@@ -8,9 +8,12 @@ class Box(object):
         self.row = row
         self.column = column
 
+        # Find the index of the GUI interface
+        self.index = convert_index(self.row, self.column)
+
         # Get what quadrant the block is in. Useful for checking later
         self.quad = self.init_quad()
-        # Initialize the possible dict
+        # Initialize the possible list
         self.init_possible()
 
     # When printing, display the value
@@ -63,6 +66,9 @@ class Box(object):
             if val in self.possible:
                 self.possible.remove(val)
 
+        # Update the gui
+        gui.cell_list[self.index].update_possible(self.possible)
+
         change = self.check_solved(gui, change)
         return change
 
@@ -75,8 +81,7 @@ class Box(object):
 
             # Update the gui
             ind = convert_index(self.row, self.column)
-            gui.button_list[ind].background_color = [0, 1, 0, 1]
-            gui.button_list[ind].text = str(self.value)
+            gui.cell_list[ind].update_solution(self.value)
 
         return change
 
