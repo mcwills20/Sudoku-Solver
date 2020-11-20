@@ -9,7 +9,7 @@ class Box(object):
         self.column = column
 
         # Find the index of the GUI interface
-        self.index = convert_index(self.row, self.column)
+        self.gui = None
 
         # Get what quadrant the block is in. Useful for checking later
         self.quad = self.init_quad()
@@ -61,18 +61,18 @@ class Box(object):
             self.solved = True
             self.possible = [self.value]
 
-    def assign_possible(self, gui, found, change):
+    def assign_possible(self, found, change):
         for val in found:
             if val in self.possible:
                 self.possible.remove(val)
 
         # Update the gui
-        gui.cell_list[self.index].update_possible(self.possible)
+        self.gui.update_possible(self.possible)
 
-        change = self.check_solved(gui, change)
+        change = self.check_solved(change)
         return change
 
-    def check_solved(self, gui, change):
+    def check_solved(self, change):
 
         if len(self.possible) == 1:
             self.solved = True
@@ -80,8 +80,7 @@ class Box(object):
             change = True
 
             # Update the gui
-            ind = convert_index(self.row, self.column)
-            gui.cell_list[ind].update_solution(self.value)
+            self.gui.update_solution(self.value)
 
         return change
 
@@ -101,8 +100,3 @@ def build_sudoku(raw):
 
     # use the final list to return a pandas dataframe with the box objects
     return pd.DataFrame(formattedlis)
-
-
-def convert_index(rownum, colnum):
-    index = -((rownum * 9) + colnum + 1)
-    return index

@@ -13,8 +13,7 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.clock import Clock
 from kivy.uix.behaviors import ButtonBehavior
-from kivy.properties import StringProperty
-from kivy.properties import ListProperty
+from kivy.properties import StringProperty, ListProperty
 
 
 class SudokuCell(GridLayout):
@@ -24,7 +23,7 @@ class SudokuCell(GridLayout):
     def __init__(self, value, possible, **kwargs):
         super(SudokuCell, self).__init__(**kwargs)
 
-        if value == 0:
+        if value == '0':
 
             self.possible = possible
 
@@ -111,12 +110,9 @@ class SudokuPy(App):
         puzzle = SudokuGrid(cols=9, rows=9, size_hint=(1, .7))
         for rownum in range(9):
             for box in sudoku.loc[rownum]:
-                if box.value != 0:
-                    puzzle.add_widget(SudokuCell(
-                        value=str(box.value), possible=box.possible))
-                else:
-                    puzzle.add_widget(SudokuCell(
-                        value=0, possible=box.possible))
+                box.gui = SudokuCell(
+                    value=str(box.value), possible=box.possible)
+                puzzle.add_widget(box.gui)
 
         # Store a reference to the cells for easy manipulation later
         self.cell_list = puzzle.children
@@ -140,16 +136,16 @@ class SudokuPy(App):
         # Erase any background colors left over
         self.clear_format()
         _change = False
-        _change = solve_gui.basic_check(self, self.sudoku, _change)
+        _change = solve_gui.basic_check(self.sudoku, _change)
 
         # If nothing changed, validate the answer
         if not _change:
-            if solve_gui.validate_answer(self, sudoku):
+            if solve_gui.validate_answer(self.sudoku):
                 self.on_complete()
                 self.basicsolve.cancel()
             else:
                 _change = solve_gui.intermediate_check(
-                    self, self.sudoku, _change)
+                    self.sudoku, _change)
                 if not _change:
                     self.on_fail()
                     self.basicsolve.cancel()
