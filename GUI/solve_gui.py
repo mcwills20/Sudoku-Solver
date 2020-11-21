@@ -79,7 +79,11 @@ def bas_check_quad(quad, sudoku, change):
 def intermediate_check(sudoku, change):
 
     for i in range(9):
-        change = row_quad_check(i, sudoku, change)
+        change = quad_to_row_check(i, sudoku, change)
+        if change:
+            return change
+    for i in range(9):
+        change = quad_to_col_check(i, sudoku, change)
         if change:
             return change
     for i in range(9):
@@ -197,7 +201,7 @@ def int_check_quad(quad, sudoku, change):
 
 # Determines if two rows are solved in a particular quadrant, the unsolved row must contain the missing values
 # Thus, you can remove these missing values from the cells located in this row in other quadrants
-def row_quad_check(quad, sudoku, change):
+def quad_to_row_check(quad, sudoku, change):
 
     quadrant = get_quad(quad, sudoku)
 
@@ -230,6 +234,37 @@ def row_quad_check(quad, sudoku, change):
     return change
 
 
+def quad_to_col_check(quad, sudoku, change):
+
+    quadrant = get_quad(quad, sudoku)
+
+    complete_cols = set()
+    incomplete_cols = set()
+
+    for i, local_col in quadrant.iteritems():
+        col_complete = True
+        for cell in local_col.values:
+            if cell.value == 0:
+                col_complete = False
+        
+        if col_complete:
+            complete_cols.add(i)
+        else:
+            incomplete_cols.add(i)
+
+    if len(complete_cols) == 2:
+        found = check_values_quad(quadrant)
+        remove_pos = {1,2,3,4,5,6,7,8,9}.difference(found)
+
+        column = eval_col(quad, incomplete_cols.pop())
+
+        for cell in sudoku.loc[:,column]:
+            if not cell.solved and cell.quad != quad:
+                change = cell.assign_possible(remove_pos, change)
+
+    return change
+
+
 def eval_row(quad, local_row):
 
     if 0 <= quad <= 2:
@@ -238,6 +273,16 @@ def eval_row(quad, local_row):
         return local_row + 3
     else:
         return local_row + 6
+
+
+def eval_col(quad, local_col):
+
+    if quad == 0 or quad == 3 or quad == 6:
+        return local_col
+    elif quad == 1 or quad == 4 or quad == 7:
+        return local_col + 3
+    else:
+        return local_col + 6
 
 
 # Function to check the solved values in a row or column

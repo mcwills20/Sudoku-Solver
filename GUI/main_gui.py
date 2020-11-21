@@ -183,13 +183,14 @@ class SudokuPy(App):
         self.textinput.text = 'FAILED'
 
     def test(self, event):
-        pass
-
-sudoku = puzzle_gui.build_sudoku(
-    "200000001003060008807031940002506070409800056100000380038670500705090263000004000")
+        change = solve_gui.quad_to_col_check(0, self.sudoku, True)
+        print('test')
 
 #sudoku = puzzle_gui.build_sudoku(
-#    "123000000000000000456000000000000000000000000000000000000000000000000000000000000")
+#    "200000001003060008807031940002506070409800056100000380038670500705090263000004000")
+
+sudoku = puzzle_gui.build_sudoku(
+    "103000000708000000406000000000000000000000000000000000000000000000000000000000000")
 
 if __name__ == '__main__':
     SudokuPy(sudoku).run()
