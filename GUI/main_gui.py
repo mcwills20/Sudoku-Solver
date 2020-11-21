@@ -121,7 +121,9 @@ class SudokuPy(App):
         root_widget.add_widget(TextInput(text='Sudoku', size_hint=(1, .1)))
         root_widget.add_widget(puzzle)
         root_widget.add_widget(
-            Button(text='Solve', on_release=self.solve_sudoku, size_hint=(1, .1)))
+            Button(text='Solve', on_release=self.solve_sudoku, size_hint=(1, .05)))
+        root_widget.add_widget(
+            Button(text='Test', on_release=self.test, size_hint=(1, .05)))
 
         # Store a reference to the textinput for easy manipulation later
         self.textinput = root_widget.children[-1]
@@ -145,7 +147,7 @@ class SudokuPy(App):
     # When solved button is press, create an event to cycle through the basic solutions
 
     def solve_sudoku(self, event):
-        self.basicsolve = Clock.schedule_interval(self.solve_step, 0.1)
+        self.basicsolve = Clock.schedule_interval(self.solve_step, 0.3)
 
     def solve_step(self, dt):
         # Erase any background colors left over
@@ -162,8 +164,10 @@ class SudokuPy(App):
                 change = solve_gui.intermediate_check(
                     self.sudoku, change)
                 if not change:
-                    self.on_fail()
-                    self.basicsolve.cancel()
+                    change = solve_gui.cross_check(self.sudoku, change)
+                    if not change:
+                        self.on_fail()
+                        self.basicsolve.cancel()
 
     def clear_format(self):
         color = [1, 1, 1, 1]
@@ -179,6 +183,9 @@ class SudokuPy(App):
         for cell in self.cell_list:
             cell.color = [1, 0, 0, 1]
         self.textinput.text = 'FAILED'
+
+    def test(self, event):
+        pass
 
 
 sudoku = puzzle_gui.build_sudoku(

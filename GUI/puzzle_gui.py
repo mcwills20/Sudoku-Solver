@@ -32,7 +32,7 @@ class Box(object):
             # Upper Middle
             else:
                 return 1
-        elif self.row >= 6:
+        elif self.row <= 6:
             # Middle Left
             if self.column <= 2:
                 return 3
@@ -56,15 +56,13 @@ class Box(object):
     def init_possible(self):
         if self.value == 0:
             self.solved = False
-            self.possible = [i for i in range(1, 10)]
+            self.possible = set([i for i in range(1, 10)])
         else:
             self.solved = True
-            self.possible = [self.value]
+            self.possible =set( [self.value])
 
     def assign_possible(self, found, change):
-        for val in found:
-            if val in self.possible:
-                self.possible.remove(val)
+        self.possible = self.possible.difference(found)
 
         # Update the gui
         self.gui.update_possible(self.possible)
@@ -76,7 +74,7 @@ class Box(object):
 
         if len(self.possible) == 1:
             self.solved = True
-            self.value = self.possible[0]
+            self.value = self.possible.pop()
             change = True
 
             # Update the gui
