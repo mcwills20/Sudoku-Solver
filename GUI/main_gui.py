@@ -174,7 +174,6 @@ class SudokuPy(App):
         for cell in self.cell_list:
             cell.color = [0, 1, 0, 1]
         self.textinput.text = 'SOLVED'
-        print(self.sudoku)
 
     def on_fail(self):
         for cell in self.cell_list:
