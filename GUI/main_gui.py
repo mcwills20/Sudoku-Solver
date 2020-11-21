@@ -13,8 +13,7 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.clock import Clock
 from kivy.uix.behaviors import ButtonBehavior
-from kivy.properties import StringProperty
-from kivy.properties import ListProperty
+from kivy.properties import StringProperty, ListProperty
 
 
 class SudokuCell(GridLayout):
@@ -24,7 +23,7 @@ class SudokuCell(GridLayout):
     def __init__(self, value, possible, **kwargs):
         super(SudokuCell, self).__init__(**kwargs)
 
-        if value == 0:
+        if value == '0':
 
             self.possible = possible
 
@@ -91,6 +90,11 @@ class SudokuCell(GridLayout):
         self.color = [0, 1, 0, 1]
 
 
+class QuadrantGrid(GridLayout):
+    def __init__(self, **kwargs):
+        super(QuadrantGrid, self).__init__(**kwargs)
+
+
 class SudokuGrid(GridLayout):
     def __init__(self, **kwargs):
         super(SudokuGrid, self).__init__(**kwargs)
@@ -101,6 +105,7 @@ class SudokuPy(App):
     def __init__(self, sudoku, **kwargs):
         super(SudokuPy, self).__init__(**kwargs)
         self.sudoku = sudoku
+        self.cell_list = []
 
     def build(self):
 
@@ -108,18 +113,9 @@ class SudokuPy(App):
         root_widget = BoxLayout(orientation='vertical', size_hint=(1, 1))
 
         # Begin building the sudoku grid
-        puzzle = SudokuGrid(cols=9, rows=9, size_hint=(1, .7))
-        for rownum in range(9):
-            for box in sudoku.loc[rownum]:
-                if box.value != 0:
-                    puzzle.add_widget(SudokuCell(
-                        value=str(box.value), possible=box.possible))
-                else:
-                    puzzle.add_widget(SudokuCell(
-                        value=0, possible=box.possible))
-
-        # Store a reference to the cells for easy manipulation later
-        self.cell_list = puzzle.children
+        puzzle = SudokuGrid(size_hint=(1, .7))
+        for quad in range(9):
+            puzzle.add_widget(self.build_quad(quad))
 
         # Build the window
         root_widget.add_widget(TextInput(text='Sudoku', size_hint=(1, .1)))
@@ -132,37 +128,53 @@ class SudokuPy(App):
 
         return root_widget
 
+    def build_quad(self, quadnum):
+        quadrant = solve_gui.get_quad(quadnum, self.sudoku)
+
+        grid = QuadrantGrid()
+
+        for _row in quadrant.itertuples(index=False):
+            for cell in _row:
+                cell.gui = SudokuCell(
+                    value=str(cell.value), possible=cell.possible)
+                grid.add_widget(cell.gui)
+                self.cell_list.append(cell.gui)
+
+        return grid
+
     # When solved button is press, create an event to cycle through the basic solutions
+
     def solve_sudoku(self, event):
         self.basicsolve = Clock.schedule_interval(self.solve_step, 0.1)
 
     def solve_step(self, dt):
         # Erase any background colors left over
         self.clear_format()
-        _change = False
-        _change = solve_gui.basic_check(self, self.sudoku, _change)
+        change = False
+        change = solve_gui.basic_check(self.sudoku, change)
 
         # If nothing changed, validate the answer
-        if not _change:
-            if solve_gui.validate_answer(self, sudoku):
+        if not change:
+            if solve_gui.validate_answer(self.sudoku):
                 self.on_complete()
                 self.basicsolve.cancel()
             else:
-                _change = solve_gui.intermediate_check(
-                    self, self.sudoku, _change)
-                if not _change:
+                change = solve_gui.intermediate_check(
+                    self.sudoku, change)
+                if not change:
                     self.on_fail()
                     self.basicsolve.cancel()
 
     def clear_format(self):
-        _color = [1, 1, 1, 1]
+        color = [1, 1, 1, 1]
         for cell in self.cell_list:
-            cell.color = _color
+            cell.color = color
 
     def on_complete(self):
         for cell in self.cell_list:
             cell.color = [0, 1, 0, 1]
         self.textinput.text = 'SOLVED'
+        print(self.sudoku)
 
     def on_fail(self):
         for cell in self.cell_list:
