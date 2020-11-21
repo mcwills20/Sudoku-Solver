@@ -276,8 +276,6 @@ def quad_to_col_check(quad, sudoku, change):
 
 # Determines, within a row, if 2 quadrants have been completed. If they have, the outstanding values in that row must be placed in the remaining
 # cells in the row. Thus it is not possible to place them in any other location in that quadrant.
-
-
 def row_to_quad_check(rownum, sudoku, change):
 
     found = check_values(sudoku.loc[rownum])
@@ -299,7 +297,8 @@ def row_to_quad_check(rownum, sudoku, change):
 
     return change
 
-
+# Determines, within a column, if 2 quadrants have been completed. If they have, the outstanding values in that column must be placed in the remaining
+# cells in the column. Thus it is not possible to place them in any other location in that quadrant.
 def col_to_quad_check(colnum, sudoku, change):
 
     found = check_values(sudoku.loc[:, colnum])
