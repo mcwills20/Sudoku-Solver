@@ -32,7 +32,7 @@ class Box(object):
             # Upper Middle
             else:
                 return 1
-        elif self.row >= 6:
+        elif self.row <= 6:
             # Middle Left
             if self.column <= 2:
                 return 3

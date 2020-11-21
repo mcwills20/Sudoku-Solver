@@ -164,7 +164,7 @@ class SudokuPy(App):
                 change = solve_gui.intermediate_check(
                     self.sudoku, change)
                 if not change:
-                    #change = solve_gui.cross_check(self.sudoku, change)
+                    change = solve_gui.cross_check(self.sudoku, change)
                     if not change:
                         self.on_fail()
                         self.basicsolve.cancel()
@@ -185,15 +185,11 @@ class SudokuPy(App):
         self.textinput.text = 'FAILED'
 
     def test(self, event):
-        change = solve_gui.row_to_quad_check(0, self.sudoku, True)
-        print('test')
-
-# sudoku = puzzle_gui.build_sudoku(
-#    "200000001003060008807031940002506070409800056100000380038670500705090263000004000")
+        pass
 
 
 sudoku = puzzle_gui.build_sudoku(
-    "123456700000000000000000000000000000000000000000000000000000000000000000000000000")
+    "200000001003060008807031940002506070409800056100000380038670500705090263000004000")
 
 if __name__ == '__main__':
     SudokuPy(sudoku).run()
