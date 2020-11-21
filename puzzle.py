@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-class Box(object):
+class Cell(object):
 
     def __init__(self, value, row, column):
         self.value = value
@@ -59,7 +59,7 @@ class Box(object):
             self.possible = set([i for i in range(1, 10)])
         else:
             self.solved = True
-            self.possible =set( [self.value])
+            self.possible = set([self.value])
 
     def assign_possible(self, found, change):
         self.possible = self.possible.difference(found)
@@ -91,10 +91,10 @@ def build_sudoku(raw):
     for i in range(0, 81, 9):
         formattedlis.append(lis[i:i+9])
 
-    # covert the lists from the raw values into the box object types
+    # covert the lists from the raw values into the Cell object types
     for rownum, row in enumerate(formattedlis):
         for colnum, val in enumerate(row):
-            formattedlis[rownum][colnum] = Box(int(val), rownum, colnum)
+            formattedlis[rownum][colnum] = Cell(int(val), rownum, colnum)
 
-    # use the final list to return a pandas dataframe with the box objects
+    # use the final list to return a pandas dataframe with the Cell objects
     return pd.DataFrame(formattedlis)

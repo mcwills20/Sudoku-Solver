@@ -1,5 +1,6 @@
-import puzzle_gui
-import solve_gui
+import puzzle
+import solve
+import solve_utils as utils
 
 import time
 
@@ -131,7 +132,7 @@ class SudokuPy(App):
         return root_widget
 
     def build_quad(self, quadnum):
-        quadrant = solve_gui.get_quad(quadnum, self.sudoku)
+        quadrant = utils.get_quad(quadnum, self.sudoku)
 
         grid = QuadrantGrid()
 
@@ -153,18 +154,18 @@ class SudokuPy(App):
         # Erase any background colors left over
         self.clear_format()
         change = False
-        change = solve_gui.basic_check(self.sudoku, change)
+        change = solve.basic_check(self.sudoku, change)
 
         # If nothing changed, validate the answer
         if not change:
-            if solve_gui.validate_answer(self.sudoku):
+            if solve.validate_answer(self.sudoku):
                 self.on_complete()
                 self.basicsolve.cancel()
             else:
-                change = solve_gui.intermediate_check(
+                change = solve.intermediate_check(
                     self.sudoku, change)
                 if not change:
-                    change = solve_gui.cross_check(self.sudoku, change)
+                    change = solve.cross_check(self.sudoku, change)
                     if not change:
                         self.on_fail()
                         self.basicsolve.cancel()
@@ -188,7 +189,7 @@ class SudokuPy(App):
         pass
 
 
-sudoku = puzzle_gui.build_sudoku(
+sudoku = puzzle.build_sudoku(
     "200000001003060008807031940002506070409800056100000380038670500705090263000004000")
 
 if __name__ == '__main__':

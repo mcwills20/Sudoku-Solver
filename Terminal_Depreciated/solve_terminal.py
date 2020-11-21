@@ -1,5 +1,5 @@
 import pandas
-from puzzle import Box
+from puzzle_terminal import Box
 
 
 # Basic checks compare the value of other boxes in the region. They remove all values found from the possible
