@@ -11,7 +11,7 @@ def eval_row(quad, local_row):
 
 
 def eval_col(quad, local_col):
-    # Used in cross check. Converts the local column in a quadrant to the absolute column of the entire puzzle.
+    # Used in cross check. Converts the local column in a quadrant to the absolute column of the entire puzzle. NOT USED
     if quad == 0 or quad == 3 or quad == 6:
         return local_col
     elif quad == 1 or quad == 4 or quad == 7:

@@ -73,15 +73,17 @@ class Cell(object):
     def check_solved(self, change):
 
         if len(self.possible) == 1:
-            self.solved = True
-            self.value = self.possible.pop()
+            self.assign_solution(self.possible.pop())
             change = True
-
-            # Update the gui
-            self.gui.update_solution(self.value)
 
         return change
 
+    def assign_solution(self, solution):
+        self.solved = True
+        self.value = solution
+        
+        # Update the gui
+        self.gui.update_solution(self.value)
 
 def build_sudoku(raw):
     # cast the raw data (which should be a string of numbers with no delimination) into a list for easier sorting
