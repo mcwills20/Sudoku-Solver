@@ -261,8 +261,8 @@ def quad_to_col_check(quad, sudoku, change):
         found = utils.check_values_quad(quadrant)
         remove_pos = {1, 2, 3, 4, 5, 6, 7, 8, 9}.difference(found)
 
-        column = utils.eval_col(quad, incomplete_cols.pop())
-
+        column = incomplete_cols.pop()
+        
         for cell in sudoku.loc[:, column]:
             if not cell.solved and cell.quad != quad:
                 change = cell.assign_possible(remove_pos, change)

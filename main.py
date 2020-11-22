@@ -15,21 +15,24 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.clock import Clock
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.properties import StringProperty, ListProperty
+from kivy.uix.behaviors import ButtonBehavior
 
 
-class SudokuCell(GridLayout):
+class SudokuCell(ButtonBehavior, GridLayout):
 
     color = ListProperty([1, 1, 1, 1])
 
-    def __init__(self, value, possible, **kwargs):
+    def __init__(self, cell, **kwargs):
         super(SudokuCell, self).__init__(**kwargs)
 
-        if value == '0':
+        self.cell = cell
+        if self.cell.value == 0:
 
-            self.possible = possible
+            self.possible = self.cell.possible
+            self.man_possible = set()
 
         else:
-            self.update_solution(value)
+            self.update_solution(self.cell.value)
             # Turn the background color back to white
             self.color = [1, 1, 1, 1]
 
@@ -89,6 +92,7 @@ class SudokuCell(GridLayout):
         self.ids.pos5.font_size = 25
         self.ids.pos5.color = [0, 0, 0, 1]
         self.color = [0, 1, 0, 1]
+    
 
 
 class QuadrantGrid(GridLayout):
@@ -101,26 +105,44 @@ class SudokuGrid(GridLayout):
         super(SudokuGrid, self).__init__(**kwargs)
 
 
+class ManualInput(BoxLayout):
+    def __init__(self, **kwargs):
+        super(ManualInput, self).__init__(**kwargs)
+
+
+
 class SudokuPy(App):
 
     def __init__(self, sudoku, **kwargs):
         super(SudokuPy, self).__init__(**kwargs)
         self.sudoku = sudoku
         self.cell_list = []
+        self.pen = False
+        self.pencil = False
+        self.entry = ''
 
     def build(self):
 
         # The main window
         root_widget = BoxLayout(orientation='vertical', size_hint=(1, 1))
 
-        # Begin building the sudoku grid
-        puzzle = SudokuGrid(size_hint=(1, .7))
+        # Build main puzzle interface
+
+        interface = BoxLayout(orientation='horizontal', size_hint=(1, .7))
+      
+               
+        # Build the sudoku grid and add it to the interface
+        puzzle = SudokuGrid(size_hint=(3.5, 1))
         for quad in range(9):
             puzzle.add_widget(self.build_quad(quad))
+        interface.add_widget(puzzle)
+
+        # Add the manual buttons
+        interface.add_widget(ManualInput())
 
         # Build the window
         root_widget.add_widget(TextInput(text='Sudoku', size_hint=(1, .1)))
-        root_widget.add_widget(puzzle)
+        root_widget.add_widget(interface)
         root_widget.add_widget(
             Button(text='Solve', on_release=self.solve_sudoku, size_hint=(1, .05)))
         root_widget.add_widget(
@@ -138,8 +160,7 @@ class SudokuPy(App):
 
         for _row in quadrant.itertuples(index=False):
             for cell in _row:
-                cell.gui = SudokuCell(
-                    value=str(cell.value), possible=cell.possible)
+                cell.gui = SudokuCell(cell)
                 grid.add_widget(cell.gui)
                 self.cell_list.append(cell.gui)
 
@@ -148,7 +169,7 @@ class SudokuPy(App):
     # When solved button is press, create an event to cycle through the basic solutions
 
     def solve_sudoku(self, event):
-        self.basicsolve = Clock.schedule_interval(self.solve_step, 0.3)
+        self.basicsolve = Clock.schedule_interval(self.solve_step, 0.1)
 
     def solve_step(self, dt):
         # Erase any background colors left over
@@ -187,10 +208,54 @@ class SudokuPy(App):
 
     def test(self, event):
         pass
+        
+
+    def change_entry(self, button):
+        for but in button.parent.children:
+            but.background_color = [1,1,1,1]
+        
+        self.entry = int(button.text)
+        button.background_color = [0,1,0,1]
+
+    def change_entry_type(self, button):
+        
+        button.background_color = [0,1,0,1]
+        # Check which button is being press
+        if button.text == 'Pen':
+            self.pen = True
+            self.pencil = False
+            # Clear color formatting on pencil button
+            button.parent.children[0].background_color = [1,1,1,1]
+            
+        else:
+            self.pencil = True
+            self.pen = False
+            # Clear color formatting on pen button
+            button.parent.children[1].background_color = [1,1,1,1]
+
+    def manual_entry(self, cell):
+        if self.entry != '':
+            if self.pen:
+                # Assign the solution to the backend sudoku puzzle, not just the GUI element
+                cell.cell.assign_solution(int(self.entry))
+                cell.color = [1,1,1,1]
+            elif self.pencil:
+                # Unlike with the pen, the pencil modifies a possible list that is only on the GUI element. It does not touch the backend
+                if self.entry in cell.man_possible:
+                    cell.man_possible.remove(int(self.entry))
+                    
+                else:
+                    cell.man_possible.add(int(self.entry))
+
+                cell.update_possible(cell.man_possible)
+            
+
 
 
 sudoku = puzzle.build_sudoku(
     "200000001003060008807031940002506070409800056100000380038670500705090263000004000")
+
+blank = puzzle.build_sudoku("000000000000000000000000000000000000000000000000000000000000000000000000000000000")
 
 if __name__ == '__main__':
     SudokuPy(sudoku).run()
