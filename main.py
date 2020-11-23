@@ -40,6 +40,14 @@ class SudokuCell(ButtonBehavior, GridLayout):
 
         self.possible = possible
 
+        for position, labelid in enumerate(self.ids, 1):
+            if position in self.possible:
+                self.ids[labelid].text = str(position)
+            else:
+                self.ids[labelid].text = ''
+        
+            
+        """
         if 1 in self.possible:
             self.ids.pos1.text = '1'
         else:
@@ -84,7 +92,7 @@ class SudokuCell(ButtonBehavior, GridLayout):
             self.ids.pos9.text = '9'
         else:
             self.ids.pos9.text = ''
-
+"""
     def update_solution(self, value):
         self.possible = []
         self.update_possible(self.possible)
@@ -248,7 +256,7 @@ class SudokuPy(App):
                     cell.man_possible.add(int(self.entry))
 
                 cell.update_possible(cell.man_possible)
-            
+
 
 
 
