@@ -47,8 +47,7 @@ class SudokuCell(ButtonBehavior, GridLayout):
                 self.ids[labelid].text = ''
 
     def update_solution(self, value):
-        self.possible = []
-        self.update_possible(self.possible)
+        self.update_possible(set())
         self.ids.pos5.text = str(value)
         self.ids.pos5.font_size = 25
         self.ids.pos5.color = [0, 0, 0, 1]
