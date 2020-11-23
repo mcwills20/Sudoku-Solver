@@ -81,6 +81,17 @@
 <ManualInput>:
 
     orientation: 'vertical'
+    Label:
+        canvas.before:
+            Color:
+                rgba: [.3,.3,.3,1]
+            Rectangle:
+                size: self.size
+                pos: self.pos
+        text: 'Manual Input'
+        size_hint_y: .2
+        color: [1,1,1,1]
+
     GridLayout:
         cols: 3
 
