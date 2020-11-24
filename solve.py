@@ -341,6 +341,39 @@ def validate_answer(sudoku):
     return solved
 
 
+def validate_region(region, final = False):
+
+    found = set()
+    error = 0
+    for cell in region:
+        if cell.value in found:
+            error = 1
+        elif cell.value == 0 and final:
+            error = 2
+        else:
+            found.add(cell.value)
+    if error != 0:
+        utils.color_red(region)
+    
+    return error
+
+def validate_quadrant(quadrant, final = False):
+
+    found = set()
+    error = 0
+    for row in quadrant.itertuples(index = False):
+        for cell in row:
+            if cell.value in found:
+                error = 1
+            elif cell.value == 0 and final:
+                error = 2
+            else:
+                found.add(cell.value)
+    
+    if error != 0:
+        utils.color_red_quad(quadrant)
+
+
 def validate_rows(sudoku, solved):
 
     for rownum in range(9):
