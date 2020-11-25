@@ -329,77 +329,88 @@ def compare_answer(sudoku, solution):
     return solved
 
 
-def validate_answer(sudoku):
+def validate_answer(sudoku, final = False):
     # Function to validate the answer if the solution is not known
 
     solved = True
 
-    solved = validate_rows(sudoku, solved)
-    solved = validate_columns(sudoku, solved)
-    solved = validate_quadrants(sudoku, solved)
+    solved, error = validate_rows(sudoku, solved)
 
-    return solved
+    #if not solved:
+    #    return solved, error
+
+    solved, error = validate_columns(sudoku, solved)
+
+    #if not solved:
+    #    return solved, error
+
+    solved, error = validate_quadrants(sudoku, solved)
+
+    return solved, error
 
 
-def validate_region(region, final = False):
+def validate_region(region, solved):
 
     found = set()
-    error = 0
+    error = False
     for cell in region:
         if cell.value in found:
-            error = 1
-        elif cell.value == 0 and final:
-            error = 2
-        else:
+            error = True
+            utils.color_red(region)
+        elif cell.value != 0:
             found.add(cell.value)
-    if error != 0:
-        utils.color_red(region)
-    
-    return error
 
-def validate_quadrant(quadrant, final = False):
+    if len(found) != 9:
+        solved = False
+
+    return solved, error
+
+def validate_quadrant(quadrant, solved):
 
     found = set()
-    error = 0
+    error = False
     for row in quadrant.itertuples(index = False):
         for cell in row:
             if cell.value in found:
-                error = 1
-            elif cell.value == 0 and final:
-                error = 2
-            else:
+                error = True
+                utils.color_red_quad(quadrant)
+            elif cell.value != 0:
                 found.add(cell.value)
     
-    if error != 0:
-        utils.color_red_quad(quadrant)
+    if len(found) != 9:
+        solved = False
 
+    return solved, error
 
 def validate_rows(sudoku, solved):
 
     for rownum in range(9):
-        found = utils.check_values(sudoku.loc[rownum])
-        if len(found) != 9:
-            solved = False
+        solved, error = validate_region(sudoku.loc[rownum], solved)
+        if error:
+            return solved, error
 
-    return solved
+
+    return solved, error
 
 
 def validate_columns(sudoku, solved):
 
     for colnum in range(9):
-        found = utils.check_values(sudoku.loc[:, colnum])
-        if len(found) != 9:
-            solved = False
+        solved, error = validate_region(sudoku.loc[:, colnum], solved)
+        
+        if error:
+            return solved, error
 
-    return solved
+    return solved, error
 
 
 def validate_quadrants(sudoku, solved):
 
     for quad in range(9):
         quadrant = utils.get_quad(quad, sudoku)
-        found = utils.check_values_quad(quadrant)
-        if len(found) != 9:
-            solved = False
+        solved, error = validate_quadrant(quadrant, solved)
+        
+        if error:
+            return solved, error
 
-    return solved
+    return solved, error

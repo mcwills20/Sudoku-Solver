@@ -136,14 +136,18 @@ class SudokuPy(App):
 
         # If nothing changed, validate the answer
         if not change:
-            if solve.validate_answer(self.sudoku):
+            solved, error = solve.validate_answer(self.sudoku)
+            if solved:
                 self.on_complete()
                 self.basicsolve.cancel()
+            elif error:
+                self.textinput.text = 'ERROR: Double Assignment'
             else:
                 change = solve.intermediate_check(
                     self.sudoku, change)
                 if not change:
                     change = solve.cross_check(self.sudoku, change)
+                    change = solve.intermediate_check(self.sudoku, change)
                     if not change:
                         self.on_fail()
                         self.basicsolve.cancel()
@@ -161,7 +165,7 @@ class SudokuPy(App):
     def on_fail(self):
         for cell in self.cell_list:
             cell.color = [1, 0, 0, 1]
-        self.textinput.text = 'FAILED'
+        self.textinput.text = 'FAILURE Unable To Complete Puzzle'
 
     def test(self, event):
         pass
