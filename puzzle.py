@@ -1,4 +1,6 @@
 import pandas as pd
+import solve_utils as utils
+import solve
 
 
 class Cell(object):
@@ -61,29 +63,62 @@ class Cell(object):
             self.solved = True
             self.possible = set([self.value])
 
-    def assign_possible(self, found, change):
+    def assign_possible(self, found, change, sudoku):
         self.possible = self.possible.difference(found)
 
         # Update the gui
         self.gui.update_possible(self.possible)
 
-        change = self.check_solved(change)
-        return change
+        change, errorcode = self.check_solved(change, sudoku)
 
-    def check_solved(self, change):
+        return change, errorcode
+
+    def check_solved(self, solvedchange, sudoku):
 
         if len(self.possible) == 1:
             self.assign_solution(self.possible.pop())
-            change = True
+            solvedchange = True
+            if self.check_double(sudoku):
+                errorcode = 2
+            else:
+                errorcode = 0
+        else:
+            errorchange, errorcode = self.check_possible(sudoku)
 
-        return change
+        change = solvedchange or errorchange
+
+        return change, errorcode
 
     def assign_solution(self, solution):
         self.solved = True
         self.value = solution
-        
+
         # Update the gui
         self.gui.update_solution(self.value)
+
+    def check_possible(self, sudoku):
+
+        if len(self.possible) == 0 and not self.solved:
+
+            self.gui.color = [1, 0, 0, 1]
+            return True, 1
+
+        else:
+
+            return False, 0
+
+    def check_double(self, sudoku):
+
+        # Check Row
+        _, errorrow = solve.validate_region(sudoku.loc[self.row], True)
+        # Check Column
+        _, errorcol = solve.validate_region(sudoku.loc[:, self.column], True)
+        # Check quadrant
+        quadrant = utils.get_quad(self.quad, sudoku)
+        _, errorquad = solve.validate_quadrant(quadrant, True)
+
+        return errorrow or errorcol or errorquad
+
 
 def build_sudoku(raw):
     # cast the raw data (which should be a string of numbers with no delimination) into a list for easier sorting

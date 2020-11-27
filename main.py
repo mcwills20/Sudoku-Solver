@@ -132,20 +132,32 @@ class SudokuPy(App):
         # Erase any background colors left over
         self.clear_format()
         change = False
-        change = solve.basic_check(self.sudoku, change)
+        change, errorcode = solve.basic_check(self.sudoku, change)
+
+        # If there is an error, immedately assign the proper error
+        if errorcode == 1:
+            self.error_possible()
+            self.basicsolve.cancel()
+        elif errorcode == 2:
+            self.error_double_assign()
+            self.basicsolve.cancel()
 
         # If nothing changed, validate the answer
         if not change:
-            if solve.validate_answer(self.sudoku):
+            solved, error = solve.validate_answer(self.sudoku)
+            if solved:
                 self.on_complete()
                 self.basicsolve.cancel()
+            elif error:
+                self.textinput.text = 'ERROR Double Assignment'
             else:
-                change = solve.intermediate_check(
+                change, errorcode = solve.intermediate_check(
                     self.sudoku, change)
                 if not change:
-                    change = solve.cross_check(self.sudoku, change)
+                    change, errorcode = solve.cross_check(self.sudoku, change)
+                    change, errorcode = solve.intermediate_check(self.sudoku, change)
                     if not change:
-                        self.on_fail()
+                        self.error_unsolved()
                         self.basicsolve.cancel()
 
     def clear_format(self):
@@ -158,10 +170,16 @@ class SudokuPy(App):
             cell.color = [0, 1, 0, 1]
         self.textinput.text = 'SOLVED'
 
-    def on_fail(self):
+    def error_unsolved(self):
         for cell in self.cell_list:
             cell.color = [1, 0, 0, 1]
-        self.textinput.text = 'FAILED'
+        self.textinput.text = 'ERROR Unable To Complete Puzzle'
+
+    def error_possible(self):
+        self.textinput.text = 'ERROR No Possible Solutions Left for Cell'
+
+    def error_double_assign(self):
+        self.textinput.text = 'ERROR Double Assignment'
 
     def test(self, event):
         pass
@@ -213,4 +231,4 @@ blank = puzzle.build_sudoku(
     "000000000000000000000000000000000000000000000000000000000000000000000000000000000")
 
 if __name__ == '__main__':
-    SudokuPy(sudoku).run()
+    SudokuPy(blank).run()

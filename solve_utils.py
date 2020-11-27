@@ -87,3 +87,24 @@ def get_quad(quad, sudoku):
         return sudoku.loc[6:8, 3:5]
     elif quad == 8:
         return sudoku.loc[6:8, 6:8]
+
+
+def color_red(region):
+
+    for cell in region:
+        cell.gui.color = [1, 0, 0, 1]
+
+def color_green(region):
+
+    for cell in region:
+        cell.gui.color = [0, 1, 0, 1]
+
+def color_red_quad(quadrant):
+    for row in quadrant.itertuples(index = False):
+        for cell in row:
+            cell.gui.color = [1, 0, 0, 1]
+
+def color_green_quad(quadrant):
+    for row in quadrant.itertuples(index = False):
+        for cell in row:
+            cell.gui.color = [0, 1, 0, 1]
