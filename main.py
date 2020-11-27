@@ -97,8 +97,14 @@ class SudokuPy(App):
         # Add the manual buttons
         interface.add_widget(ManualInput())
 
-        # Build the window
-        root_widget.add_widget(TextInput(text='Sudoku', size_hint=(1, .1)))
+        # Add manual puzzle entry window
+        puzzleentry = BoxLayout(orientation='horizontal', size_hint=(1, .1))
+
+        puzzleentry.add_widget(TextInput(text='Enter Puzzle as String Here', size_hint=(.7, 1)))
+        puzzleentry.add_widget(Button(text = 'Build', on_release= self.build_entry, size_hint=(.3,1)))
+
+        # Build the app
+        root_widget.add_widget(puzzleentry)
         root_widget.add_widget(interface)
         root_widget.add_widget(
             Button(text='Solve', on_release=self.solve_sudoku, size_hint=(1, .05)))
@@ -106,7 +112,7 @@ class SudokuPy(App):
             Button(text='Test', on_release=self.test, size_hint=(1, .05)))
 
         # Store a reference to the textinput for easy manipulation later
-        self.textinput = root_widget.children[-1]
+        self.textinput = root_widget.children[-1].children[-1]
 
         return root_widget
 
@@ -227,6 +233,8 @@ class SudokuPy(App):
 
                 cell.update_possible(cell.man_possible)
 
+    def build_entry(self, event):
+        pass
 
 sudoku = puzzle.build_sudoku(
     "200000001003060008807031940002506070409800056100000380038670500705090263000004000")
