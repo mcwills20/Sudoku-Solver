@@ -167,11 +167,13 @@ class SudokuPy(App):
 
     def on_complete(self):
         for cell in self.cell_list:
+            # Set color to Green
             cell.color = [0, 1, 0, 1]
         self.textinput.text = 'SOLVED'
 
     def error_unsolved(self):
         for cell in self.cell_list:
+            # Set color to Red
             cell.color = [1, 0, 0, 1]
         self.textinput.text = 'ERROR Unable To Complete Puzzle'
 
@@ -186,9 +188,11 @@ class SudokuPy(App):
 
     def change_entry(self, button):
         for but in button.parent.children:
+            # Reset all number pad buttons to default background
             but.background_color = [1, 1, 1, 1]
 
         self.entry = int(button.text)
+        # Set color to green
         button.background_color = [0, 1, 0, 1]
 
     def change_entry_type(self, button):

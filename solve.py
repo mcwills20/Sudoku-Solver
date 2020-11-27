@@ -339,13 +339,7 @@ def validate_answer(sudoku, final = False):
 
     solved, error = validate_rows(sudoku, solved)
 
-    #if not solved:
-    #    return solved, error
-
     solved, error = validate_columns(sudoku, solved)
-
-    #if not solved:
-    #    return solved, error
 
     solved, error = validate_quadrants(sudoku, solved)
 
@@ -363,6 +357,7 @@ def validate_region(region, solved):
         elif cell.value != 0:
             found.add(cell.value)
 
+    # Solved by default is true during the validate_answer call. If all 9 values are not found, then it is not solved
     if len(found) != 9:
         solved = False
 
@@ -380,6 +375,7 @@ def validate_quadrant(quadrant, solved):
             elif cell.value != 0:
                 found.add(cell.value)
     
+    # Solved by default is true during the validate_answer call. If all 9 values are not found, then it is not solved
     if len(found) != 9:
         solved = False
 

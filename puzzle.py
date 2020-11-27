@@ -85,6 +85,7 @@ class Cell(object):
         else:
             errorchange, errorcode = self.check_possible(sudoku)
 
+        # If there is an error, the errorchange variable will be set to true, which will cause the solve function to return early
         change = solvedchange or errorchange
 
         return change, errorcode
@@ -99,12 +100,13 @@ class Cell(object):
     def check_possible(self, sudoku):
 
         if len(self.possible) == 0 and not self.solved:
-
+            # Set the background color to red
             self.gui.color = [1, 0, 0, 1]
+            # Returns errorchange True, which causes the solve function to return after this step
             return True, 1
 
         else:
-
+            # Returns errorchange False, which lets the solve function continue as normal
             return False, 0
 
     def check_double(self, sudoku):
