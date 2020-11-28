@@ -26,6 +26,10 @@ class SudokuCell(ButtonBehavior, GridLayout):
         super(SudokuCell, self).__init__(**kwargs)
 
         self.cell = cell
+        self.initialize()
+        
+
+    def initialize(self):
         if self.cell.value == 0:
 
             self.possible = self.cell.possible
@@ -234,7 +238,28 @@ class SudokuPy(App):
                 cell.update_possible(cell.man_possible)
 
     def build_entry(self, event):
-        pass
+
+        if len(self.textinput.text) == 81:
+            
+            
+            entry = utils.entry_generator(self.textinput.text)
+
+            for row in self.sudoku.itertuples(index = False):
+                for i in range(len(row)):
+                    try:
+                        _value = int(next(entry))
+                    except:
+                        self.textinput.text = 'Entry not numbers'
+                        return None
+                    row[i].reinit()
+                    if _value != 0:
+                        row[i].assign_solution(_value)
+                        row[i].gui.color = [1,1,1,1]
+        else:
+            self.textinput.text = 'Entry not 81 characters'
+            
+
+    
 
 sudoku = puzzle.build_sudoku(
     "200000001003060008807031940002506070409800056100000380038670500705090263000004000")
