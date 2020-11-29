@@ -27,9 +27,9 @@ class SudokuCell(ButtonBehavior, GridLayout):
 
         self.cell = cell
         self.initialize()
-        
 
     def initialize(self):
+
         if self.cell.value == 0:
 
             self.possible = self.cell.possible
@@ -104,8 +104,10 @@ class SudokuPy(App):
         # Add manual puzzle entry window
         puzzleentry = BoxLayout(orientation='horizontal', size_hint=(1, .1))
 
-        puzzleentry.add_widget(TextInput(text='Enter Puzzle as String Here', size_hint=(.7, 1)))
-        puzzleentry.add_widget(Button(text = 'Build', on_release= self.build_entry, size_hint=(.3,1)))
+        puzzleentry.add_widget(
+            TextInput(text='Enter Puzzle as String Here', size_hint=(.7, 1)))
+        puzzleentry.add_widget(
+            Button(text='Build', on_release=self.build_entry, size_hint=(.3, 1)))
 
         # Build the app
         root_widget.add_widget(puzzleentry)
@@ -165,7 +167,8 @@ class SudokuPy(App):
                     self.sudoku, change)
                 if not change:
                     change, errorcode = solve.cross_check(self.sudoku, change)
-                    change, errorcode = solve.intermediate_check(self.sudoku, change)
+                    change, errorcode = solve.intermediate_check(
+                        self.sudoku, change)
                     if not change:
                         self.error_unsolved()
                         self.basicsolve.cancel()
@@ -240,11 +243,10 @@ class SudokuPy(App):
     def build_entry(self, event):
 
         if len(self.textinput.text) == 81:
-            
-            
+
             entry = utils.entry_generator(self.textinput.text)
 
-            for row in self.sudoku.itertuples(index = False):
+            for row in self.sudoku.itertuples(index=False):
                 for i in range(len(row)):
                     try:
                         _value = int(next(entry))
@@ -254,12 +256,10 @@ class SudokuPy(App):
                     row[i].reinit()
                     if _value != 0:
                         row[i].assign_solution(_value)
-                        row[i].gui.color = [1,1,1,1]
+                        row[i].gui.color = [1, 1, 1, 1]
         else:
             self.textinput.text = 'Entry not 81 characters'
-            
 
-    
 
 sudoku = puzzle.build_sudoku(
     "200000001003060008807031940002506070409800056100000380038670500705090263000004000")
