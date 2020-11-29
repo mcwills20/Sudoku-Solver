@@ -10,6 +10,8 @@ class Cell(object):
         self.row = row
         self.column = column
 
+        self.mutable = self.value == 0
+        
         # Find the index of the GUI interface
         self.gui = None
 
