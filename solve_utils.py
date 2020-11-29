@@ -108,3 +108,7 @@ def color_green_quad(quadrant):
     for row in quadrant.itertuples(index = False):
         for cell in row:
             cell.gui.color = [0, 1, 0, 1]
+
+def entry_generator(entry):
+    for i in range(81):
+        yield entry[i]

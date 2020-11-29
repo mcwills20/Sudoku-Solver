@@ -121,6 +121,17 @@ class Cell(object):
 
         return errorrow or errorcol or errorquad
 
+    def reinit(self):
+        self.solved = False
+        self.value = 0
+        self.gui.value = 0
+        self.gui.ids.pos5.font_size = 15
+        self.gui.ids.pos5.text = ''
+        self.gui.ids.pos5.color = [0, 0, 0, .3]
+        self.gui.color = [1, 1, 1, 1]
+        self.init_possible()
+        self.gui.initialize()
+
 
 def build_sudoku(raw):
     # cast the raw data (which should be a string of numbers with no delimination) into a list for easier sorting
