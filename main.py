@@ -1,6 +1,7 @@
 import puzzle
 import solve
 import solve_utils as utils
+import backtrack
 
 import time
 
@@ -39,6 +40,7 @@ class SudokuCell(ButtonBehavior, GridLayout):
             self.update_solution(self.cell.value)
             # Turn the background color back to white
             self.color = [1, 1, 1, 1]
+            self.ids.pos5.color = [1, 0, 1, 1]
 
     def update_possible(self, possible):
 
@@ -56,6 +58,14 @@ class SudokuCell(ButtonBehavior, GridLayout):
         self.ids.pos5.font_size = 25
         self.ids.pos5.color = [0, 0, 0, 1]
         self.color = [0, 1, 0, 1]
+
+    def backtrack_update(self, value):
+        if value != 0:
+            self.ids.pos5.text = str(value)
+            self.ids.pos5.font_size = 25
+            self.ids.pos5.color = [0, 0, 0, 1]
+        else:
+            self.ids.pos5.text = ''
 
 
 class QuadrantGrid(GridLayout):
@@ -105,7 +115,7 @@ class SudokuPy(App):
         puzzleentry = BoxLayout(orientation='horizontal', size_hint=(1, .1))
 
         puzzleentry.add_widget(
-            TextInput(text='Enter Puzzle as String Here', size_hint=(.7, 1)))
+            TextInput(text='200000001003060008807031940002506070409800056100000380038670500705090263000004000', size_hint=(.7, 1)))
         puzzleentry.add_widget(
             Button(text='Build', on_release=self.build_entry, size_hint=(.3, 1)))
 
@@ -197,7 +207,7 @@ class SudokuPy(App):
         self.textinput.text = 'ERROR Double Assignment'
 
     def test(self, event):
-        pass
+        self.solve_backtrack(event)
 
     def change_entry(self, button):
         for but in button.parent.children:
@@ -257,8 +267,26 @@ class SudokuPy(App):
                     if _value != 0:
                         row[i].assign_solution(_value)
                         row[i].gui.color = [1, 1, 1, 1]
+                        row[i].gui.ids.pos5.color = [1, 0, 1, 1]
+                        row[i].mutable = False
         else:
             self.textinput.text = 'Entry not 81 characters'
+
+    def solve_backtrack(self, event):
+        self.backtrack_next = (0, 0)
+        self.forward = True
+        self.backtrack = Clock.schedule_interval(
+            self.backtrack_step, 0.0000001)
+
+    def backtrack_step(self, dt):
+        if self.backtrack_next != (None, None):
+            self.backtrack_next, self.forward = backtrack.backtrack(
+                self.sudoku, self.backtrack_next, self.forward)
+        else:
+            solved, error = solve.validate_answer(self.sudoku)
+            if solved:
+                self.on_complete()
+            self.backtrack.cancel()
 
 
 sudoku = puzzle.build_sudoku(

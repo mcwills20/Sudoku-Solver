@@ -2,24 +2,27 @@ import pandas as pd
 import solve_utils as utils
 import solve
 
-
 class Cell(object):
 
     def __init__(self, value, row, column):
         self.value = value
         self.row = row
         self.column = column
-
-        self.mutable = self.value == 0
+        
         
         # Find the index of the GUI interface
         self.gui = None
-
         # Get what quadrant the block is in. Useful for checking later
         self.quad = self.init_quad()
         # Initialize the possible list
         self.init_possible()
-
+        
+        # Assign values for backtracking
+        self.assign_next()
+        self.assign_previous()
+        self.mutable = self.value == 0
+        self.new = True
+        
     # When printing, display the value
     def __repr__(self):
         return str(self.value)
@@ -36,7 +39,7 @@ class Cell(object):
             # Upper Middle
             else:
                 return 1
-        elif self.row <= 6:
+        elif self.row <= 5:
             # Middle Left
             if self.column <= 2:
                 return 3
@@ -134,6 +137,27 @@ class Cell(object):
         self.init_possible()
         self.gui.initialize()
 
+    def assign_next(self):
+
+        if self.row == 8 and self.column == 8:
+            self.next = (None, None)
+        
+        elif self.column == 8:
+            self.next = (self.row + 1, 0)
+        
+        else:
+            self.next = (self.row, self.column + 1)
+
+    def assign_previous(self):
+
+        if self.row == 0 and self.column == 0:
+            self.previous =  (None, None)
+        
+        elif self.column == 0:
+            self.previous = (self.row - 1, 8)
+        
+        else:
+            self.previous = (self.row, self.column -1)
 
 def build_sudoku(raw):
     # cast the raw data (which should be a string of numbers with no delimination) into a list for easier sorting
