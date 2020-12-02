@@ -115,7 +115,7 @@ class SudokuPy(App):
         puzzleentry = BoxLayout(orientation='horizontal', size_hint=(1, .1))
 
         puzzleentry.add_widget(
-            TextInput(text='200000001003060008807031940002506070409800056100000380038670500705090263000004000', size_hint=(.7, 1)))
+            TextInput(text='700005800500010030800079000000000016039000420260000000000290005080050009002600003', size_hint=(.7, 1)))
         puzzleentry.add_widget(
             Button(text='Build', on_release=self.build_entry, size_hint=(.3, 1)))
 
@@ -123,9 +123,9 @@ class SudokuPy(App):
         root_widget.add_widget(puzzleentry)
         root_widget.add_widget(interface)
         root_widget.add_widget(
-            Button(text='Solve', on_release=self.solve_sudoku, size_hint=(1, .05)))
+            Button(text='Smart Solve', on_release=self.solve_sudoku, size_hint=(1, .05)))
         root_widget.add_widget(
-            Button(text='Test', on_release=self.test, size_hint=(1, .05)))
+            Button(text='Backtrack Solve', on_release=self.solve_backtrack, size_hint=(1, .05)))
 
         # Store a reference to the textinput for easy manipulation later
         self.textinput = root_widget.children[-1].children[-1]
@@ -184,30 +184,29 @@ class SudokuPy(App):
                         self.basicsolve.cancel()
 
     def clear_format(self):
-        color = [1, 1, 1, 1]
+        self.iter_cells_color([1, 1, 1, 1])
+
+    def color_red(self):
+        self.iter_cells_color([1, 0, 0, 1])
+
+    def iter_cells_color(self, color):
         for cell in self.cell_list:
             cell.color = color
 
     def on_complete(self):
-        for cell in self.cell_list:
-            # Set color to Green
-            cell.color = [0, 1, 0, 1]
+        # Set color to Green
+        self.iter_cells_color( [0, 1, 0, 1])
         self.textinput.text = 'SOLVED'
 
     def error_unsolved(self):
-        for cell in self.cell_list:
-            # Set color to Red
-            cell.color = [1, 0, 0, 1]
-        self.textinput.text = 'ERROR Unable To Complete Puzzle'
+        self.color_red()
+        self.textinput.text = 'ERROR Unable To Complete Puzzle, Try Backtrack'
 
     def error_possible(self):
         self.textinput.text = 'ERROR No Possible Solutions Left for Cell'
 
     def error_double_assign(self):
         self.textinput.text = 'ERROR Double Assignment'
-
-    def test(self, event):
-        self.solve_backtrack(event)
 
     def change_entry(self, button):
         for but in button.parent.children:
@@ -267,12 +266,16 @@ class SudokuPy(App):
                     if _value != 0:
                         row[i].assign_solution(_value)
                         row[i].gui.color = [1, 1, 1, 1]
-                        row[i].gui.ids.pos5.color = [1, 0, 1, 1]
+                        row[i].gui.ids.pos5.color = [0, 0, 0, 1]
                         row[i].mutable = False
+            print("Done")
         else:
             self.textinput.text = 'Entry not 81 characters'
 
     def solve_backtrack(self, event):
+        self.clear_format()
+        self.clear_gui_possible()
+        # Start the recursive function at the first cell, going forward
         self.backtrack_next = (0, 0)
         self.forward = True
         self.backtrack = Clock.schedule_interval(
@@ -286,8 +289,17 @@ class SudokuPy(App):
             solved, error = solve.validate_answer(self.sudoku)
             if solved:
                 self.on_complete()
+            else:
+                self.textinput.text = 'ERROR: Backtrack Failed No Solution Possible'
+                self.color_red()
             self.backtrack.cancel()
 
+    def clear_gui_possible(self):
+        # Clear the possible pencil marks during backtracking
+        for cell in self.cell_list:
+            if cell.cell.mutable:
+                for child in cell.children:
+                    child.text = ''
 
 sudoku = puzzle.build_sudoku(
     "200000001003060008807031940002506070409800056100000380038670500705090263000004000")
