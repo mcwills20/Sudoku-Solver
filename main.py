@@ -115,7 +115,7 @@ class SudokuPy(App):
         puzzleentry = BoxLayout(orientation='horizontal', size_hint=(1, .1))
 
         puzzleentry.add_widget(
-            TextInput(text='700005800500010030800079000000000016039000420260000000000290005080050009002600003', size_hint=(.7, 1)))
+            TextInput(text='Enter Puzzle as String Here', size_hint=(.7, 1)))
         puzzleentry.add_widget(
             Button(text='Build', on_release=self.build_entry, size_hint=(.3, 1)))
 
