@@ -98,8 +98,8 @@ class Cell(object):
     def assign_solution(self, solution):
         self.solved = True
         self.value = solution
-        # Set mutable to true so it will not be overwritten during backtracking
-        self.mutable = True
+        # Set mutable to false so it will not be overwritten during backtracking
+        self.mutable = False
 
         # Update the gui
         self.gui.update_solution(self.value)
