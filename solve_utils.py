@@ -49,9 +49,9 @@ def eval_quads(region):
 def check_values(region):
     # Function to check the solved values in a row or column
     found = set()
-    for box in region:
-        if box.value != 0:
-            found.add(box.value)
+    for cell in region:
+        if cell.value != 0:
+            found.add(cell.value)
 
     return found
 
@@ -60,9 +60,9 @@ def check_values_quad(quadrant):
     # Function to check the solved values in a quadrant
     found = []
     for row in quadrant.itertuples(index=False):
-        for box in row:
-            if box.value != 0:
-                found.append(box.value)
+        for cell in row:
+            if cell.value != 0:
+                found.append(cell.value)
 
     return set(found)
 
