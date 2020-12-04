@@ -133,6 +133,8 @@ class Cell(object):
         self.value = 0
         self.gui.value = 0
         self.mutable = True
+        self.new = True
+        self.tpossible = set()
         self.gui.ids.pos5.font_size = 15
         self.gui.ids.pos5.text = ''
         self.gui.ids.pos5.color = [0, 0, 0, .3]
