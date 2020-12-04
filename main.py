@@ -129,6 +129,9 @@ class SudokuPy(App):
         # Store a reference to the textinput for easy manipulation later
         self.textinput = root_widget.children[-1].children[-1]
 
+        # Initialize a solved value
+        self.solved = False
+
         return root_widget
 
     def build_box(self, boxnum):
@@ -145,7 +148,13 @@ class SudokuPy(App):
 
     # When solved button is press, create an event to cycle through the smart solve steps
     def solve_sudoku(self, event):
-        self.smartsolve = Clock.schedule_interval(self.solve_step, 0.1)
+        
+        if not self.solved:
+
+            self.smartsolve = Clock.schedule_interval(self.solve_step, 0.1)
+        
+        else:
+            self.textinput.text = 'This is already solved, why would you want to solve again?'
 
     def solve_step(self, dt):
         # Erase any background colors left over
@@ -185,6 +194,7 @@ class SudokuPy(App):
         # Set color to Green
         self.iter_cells_color([0, 1, 0, 1])
         self.textinput.text = 'SOLVED'
+        self.solved = True
 
     def error_unsolved(self):
         self.color_red()
@@ -197,13 +207,19 @@ class SudokuPy(App):
         self.textinput.text = 'ERROR: Double Assignment'
 
     def solve_backtrack(self, event):
-        self.clear_format()
-        self.clear_gui_possible()
-        # Start the recursive function at the first cell, going forward
-        self.backtrack_next = (0, 0)
-        self.forward = True
-        self.backtrack = Clock.schedule_interval(
-            self.backtrack_step, 0.0000001)
+        
+        if not self.solved:
+
+            self.clear_format()
+            self.clear_gui_possible()
+            # Start the recursive function at the first cell, going forward
+            self.backtrack_next = (0, 0)
+            self.forward = True
+            self.backtrack = Clock.schedule_interval(
+                self.backtrack_step, 0.0000001)
+        
+        else:
+            self.textinput.text = 'This is already solved, why would you want to solve again?'
 
     def backtrack_step(self, dt):
         # If the backtrack is going backwards on the first cell, there is no possible solution
@@ -223,6 +239,7 @@ class SudokuPy(App):
         else:
             self.backtrack_next, self.forward = backtrack.backtrack(
                 self.sudoku, self.backtrack_next, self.forward)
+
 
     def manual_entry(self, cell):
         if self.entry != '':
@@ -284,6 +301,8 @@ class SudokuPy(App):
                         row[i].gui.color = [1, 1, 1, 1]
                         row[i].gui.ids.pos5.color = [0, 0, 0, 1]
                         row[i].mutable = False
+            
+            self.solved = False
 
         else:
             self.textinput.text = 'ERROR: Entry not 81 characters'
