@@ -1,5 +1,7 @@
 import solve_utils as utils
 
+from copy import deepcopy
+
 
 def basic_check(sudoku, change):
     # Basic checks compare the value of other cells in the region. They remove all values found from the possible
@@ -94,7 +96,21 @@ def int_check_row(rownum, sudoku, change):
 
     found = utils.check_values(sudoku.loc[rownum])
     errorcode = 0
-    for cell in sudoku.loc[rownum]:
+
+    return int_check_region(sudoku.loc[rownum], found, errorcode, sudoku, change)
+
+
+def int_check_column(colnum, sudoku, change):
+
+    found = utils.check_values(sudoku.loc[:, colnum])
+    errorcode = 0
+
+    return int_check_region(sudoku.loc[:, colnum], found, errorcode, sudoku, change)
+
+
+def int_check_region(region, found, errorcode, sudoku, change):
+
+    for cell in region:
         if not cell.solved:
             # Create a temporary list of possible values to check for
             possible = cell.possible.copy()
@@ -104,41 +120,12 @@ def int_check_row(rownum, sudoku, change):
                     possible.remove(val)
 
             # Loop through the other cells in the row to find their possible values
-            for checkcell in sudoku.loc[rownum]:
+            for checkcell in region:
                 # Only check if the cell isn't solved and it isn't the cell we are comparing to
                 if not checkcell.solved and cell != checkcell:
                     # Loop through all the possible values in the check cell
                     for pos in checkcell.possible:
-                        # If we find a value that is in the source, remove it
-                        if pos in possible:
-                            possible.remove(pos)
-
-            # If there is only one possible solution left, that must be the solution for this cell.
-            if len(possible) == 1:
-                cell.possible = possible.copy()
-                change, errorcode = cell.check_solved(change, sudoku)
-                if change:
-                    return change, errorcode
-
-    return change, errorcode
-
-
-def int_check_column(colnum, sudoku, change):
-
-    found = utils.check_values(sudoku.loc[:, colnum])
-    errorcode = 0
-    for cell in sudoku.loc[:, colnum]:
-        if not cell.solved:
-            # Create a temporary list of possible values to check for
-            possible = cell.possible.difference(found)
-
-            # Loop through the other cells in the column to find their possible values
-            for checkcell in sudoku.loc[:, colnum]:
-                # Only check if the cell isn't solved and it isn't the cell we are comparing to
-                if not checkcell.solved and cell != checkcell:
-                    # Loop through all the possible values in the check cell
-                    for pos in checkcell.possible:
-                        # If we find a value that is in the source, remove it
+                        # If a value is in the source, remove it
                         if pos in possible:
                             possible.remove(pos)
 
@@ -159,23 +146,21 @@ def int_check_box(boxnum, sudoku, change):
 
     found = utils.check_values_box(box)
     errorcode = 0
-    # Start checking the cells in the box
+
+    # Start checking the cells in the box. Cannot use int_check_region due needing to use the iter_box generator
     for cell in utils.iter_box(box):
         if not cell.solved:
             # Create a tempoarty list of possible values to check for
             possible = cell.possible.difference(found)
 
             # Loop through the other cells in the quardrant to find their possible values
-            for checkrow in box.itertuples(index=False):
+            for checkcell in utils.iter_box(box):
                 # Only check if the cell isn't solved and it isn't the cell we are comparing to
-                for checkcell in checkrow:
-
-                    # Only check if the cell isn't solved and it isn't the cell we are comparing to
-                    if not checkcell.solved and cell != checkcell:
-                        for pos in checkcell.possible:
-                            # If there is a value that is in the source possible list, remove it
-                            if pos in possible:
-                                possible.remove(pos)
+                if not checkcell.solved and cell != checkcell:
+                    for pos in checkcell.possible:
+                        # If there is a value that is in the source possible list, remove it
+                        if pos in possible:
+                            possible.remove(pos)
 
             # If there is only one possible solution left, that must be the solution for this cell
             if len(possible) == 1:
@@ -314,7 +299,8 @@ def col_to_box_check(colnum, sudoku, change):
 
             for cell in utils.iter_box(box):
                 if not cell.solved and cell.column != colnum:
-                    change, errorcode = cell.assign_possible(remove_pos, change, sudoku)
+                    change, errorcode = cell.assign_possible(
+                        remove_pos, change, sudoku)
 
     return change, errorcode
 
@@ -385,6 +371,7 @@ def validate_rows(sudoku, solved):
 
     for rownum in range(9):
         solved, error = validate_region(sudoku.loc[rownum], solved)
+
         if error:
             return solved, error
 
