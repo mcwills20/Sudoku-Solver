@@ -168,7 +168,7 @@ class SudokuPy(App):
                 self.on_complete()
                 self.smartsolve.cancel()
             elif error:
-                self.textinput.text = 'ERROR Double Assignment'
+                self.textinput.text = 'ERROR: Double Assignment'
                 self.smartsolve.cancel()
             else:
                 change, errorcode = solve.intermediate_check(
@@ -188,13 +188,13 @@ class SudokuPy(App):
 
     def error_unsolved(self):
         self.color_red()
-        self.textinput.text = 'ERROR Unable To Complete Puzzle, Try Backtrack'
+        self.textinput.text = 'ERROR: Unable To Complete Puzzle, Try Backtrack'
 
     def error_possible(self):
-        self.textinput.text = 'ERROR No Possible Solutions Left for Cell'
+        self.textinput.text = 'ERROR: No Possible Solutions Left for Cell'
 
     def error_double_assign(self):
-        self.textinput.text = 'ERROR Double Assignment'
+        self.textinput.text = 'ERROR: Double Assignment'
 
     def solve_backtrack(self, event):
         self.clear_format()
@@ -276,7 +276,7 @@ class SudokuPy(App):
                     try:
                         _value = int(next(entry))
                     except:
-                        self.textinput.text = 'Entry not numbers'
+                        self.textinput.text = 'ERROR: Entry not numbers'
                         return None
                     row[i].reinit()
                     if _value != 0:
@@ -286,7 +286,7 @@ class SudokuPy(App):
                         row[i].mutable = False
 
         else:
-            self.textinput.text = 'Entry not 81 characters'
+            self.textinput.text = 'ERROR: Entry not 81 characters'
 
     def clear_format(self):
         self.iter_cells_color([1, 1, 1, 1])
