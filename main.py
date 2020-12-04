@@ -26,20 +26,20 @@ class SudokuCell(ButtonBehavior, GridLayout):
     def __init__(self, cell, **kwargs):
         super(SudokuCell, self).__init__(**kwargs)
 
-        self.cell = cell
+        self.backend_cell = cell
         self.initialize()
 
     def initialize(self):
 
-        if self.cell.value == 0:
+        if self.backend_cell.value == 0:
 
-            self.possible = self.cell.possible
+            self.possible = self.backend_cell.possible
             self.man_possible = set()
             for labelid in self.ids:
                 self.ids[labelid].text = ''
 
         else:
-            self.update_solution(self.cell.value)
+            self.update_solution(self.backend_cell.value)
             # Turn the background color back to white
             self.color = [1, 1, 1, 1]
             self.ids.pos5.color = [1, 0, 1, 1]
@@ -246,19 +246,19 @@ class SudokuPy(App):
     def manual_entry(self, cell):
         if self.entry != '':
             if self.pen:
-                if not cell.cell.original:
-                    if cell.cell.value == self.entry:
-                        cell.cell.reinit()
+                if not cell.backend_cell.original:
+                    if cell.backend_cell.value == self.entry:
+                        cell.backend_cell.reinit()
                     else:
                         # Assign the solution to the backend sudoku puzzle, not just the GUI element
-                        cell.cell.assign_solution(int(self.entry))
+                        cell.backend_cell.assign_solution(int(self.entry))
                         cell.color = [1, 1, 1, 1]
                 else:
                     self.textinput.text = 'Cell is original, cannot be manually changed'
 
 
             elif self.pencil:
-                if not cell.cell.solved:
+                if not cell.backend_cell.solved:
                     # Unlike with the pen, the pencil modifies a possible list that is only on the GUI element. It does not touch the backend
                     if self.entry in cell.man_possible:
                         cell.man_possible.remove(int(self.entry))
@@ -333,7 +333,7 @@ class SudokuPy(App):
     def clear_gui_possible(self):
         # Clear the possible pencil marks during backtracking
         for cell in self.cell_list:
-            if cell.cell.mutable:
+            if cell.backend_cell.mutable:
                 for child in cell.children:
                     child.text = ''
 
