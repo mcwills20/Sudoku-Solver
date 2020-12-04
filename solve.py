@@ -28,30 +28,18 @@ def bas_check_row(rownum, sudoku, change):
 
     # Check which values exist in the row
     found = utils.check_values(sudoku.loc[rownum])
-    errorcode = 0
-    # Assign the possible values. Found values cannot be possible
-    for cell in sudoku.loc[rownum]:
-        if not cell.solved:
-            change, errorcode = cell.assign_possible(found, change, sudoku)
-            if change:
-                return change, errorcode
 
-    return change, errorcode
+    # Assign possible values based on found, return if a cell has been solved or if there is an error
+    return bas_check_region(sudoku.loc[rownum], sudoku, change, found)
 
 
 def bas_check_column(colnum, sudoku, change):
 
     # Check which values exist in the column
     found = utils.check_values(sudoku.loc[:, colnum])
-    errorcode = 0
-    # Assign the possible values. Found values cannot be possible
-    for cell in sudoku.loc[:, colnum]:
-        if not cell.solved:
-            change, errorcode = cell.assign_possible(found, change, sudoku)
-            if change:
-                return change, errorcode
 
-    return change, errorcode
+    # Assign possible values based on found, return if a cell has been solved or if there is an error
+    return bas_check_region(sudoku.loc[:, colnum], sudoku, change, found)
 
 
 def bas_check_box(boxnum, sudoku, change):
@@ -61,9 +49,17 @@ def bas_check_box(boxnum, sudoku, change):
 
     # Check which values exist in the box
     found = utils.check_values_box(box)
+
+    # Assign possible values based on found, return if a cell has been solved or if there is an error
+    return bas_check_region(utils.iter_box(box), sudoku, change, found)
+
+
+def bas_check_region(region, sudoku, change, found):
+
     errorcode = 0
+
     # Assign the possible values. Found values cannot be possible
-    for cell in utils.iter_box(box):
+    for cell in region:
         if not cell.solved:
             change, errorcode = cell.assign_possible(found, change, sudoku)
             if change:
