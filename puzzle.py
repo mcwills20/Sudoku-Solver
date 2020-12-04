@@ -12,8 +12,8 @@ class Cell(object):
         
         # Find the index of the GUI interface
         self.gui = None
-        # Get what quadrant the block is in. Useful for checking later
-        self.quad = self.init_quad()
+        # Get what box the cell is in. Useful for checking later
+        self.box = self.init_box()
         # Initialize the possible list
         self.init_possible()
         
@@ -27,7 +27,7 @@ class Cell(object):
     def __repr__(self):
         return str(self.value)
 
-    def init_quad(self):
+    def init_box(self):
 
         if self.row <= 2:
             # Upper left
@@ -63,9 +63,11 @@ class Cell(object):
     def init_possible(self):
         if self.value == 0:
             self.solved = False
+            self.original = False
             self.possible = set([i for i in range(1, 10)])
         else:
             self.solved = True
+            self.original = True
             self.possible = set([self.value])
 
     def assign_possible(self, found, change, sudoku):
@@ -122,16 +124,20 @@ class Cell(object):
         _, errorrow = solve.validate_region(sudoku.loc[self.row], True)
         # Check Column
         _, errorcol = solve.validate_region(sudoku.loc[:, self.column], True)
-        # Check quadrant
-        quadrant = utils.get_quad(self.quad, sudoku)
-        _, errorquad = solve.validate_quadrant(quadrant, True)
+        # Check box
+        box = utils.get_box(self.box, sudoku)
+        _, errorbox = solve.validate_box(box, True)
 
-        return errorrow or errorcol or errorquad
+        return errorrow or errorcol or errorbox
 
     def reinit(self):
         self.solved = False
         self.value = 0
         self.gui.value = 0
+        self.mutable = True
+        self.original = False
+        self.new = True
+        self.tpossible = set()
         self.gui.ids.pos5.font_size = 15
         self.gui.ids.pos5.text = ''
         self.gui.ids.pos5.color = [0, 0, 0, .3]
@@ -142,7 +148,7 @@ class Cell(object):
     def assign_next(self):
 
         if self.row == 8 and self.column == 8:
-            self.next = (None, None)
+            self.next = ('End', 'End')
         
         elif self.column == 8:
             self.next = (self.row + 1, 0)
@@ -153,7 +159,7 @@ class Cell(object):
     def assign_previous(self):
 
         if self.row == 0 and self.column == 0:
-            self.previous =  (None, None)
+            self.previous =  ('Beginning', 'Beginning')
         
         elif self.column == 0:
             self.previous = (self.row - 1, 8)

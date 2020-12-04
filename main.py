@@ -26,18 +26,20 @@ class SudokuCell(ButtonBehavior, GridLayout):
     def __init__(self, cell, **kwargs):
         super(SudokuCell, self).__init__(**kwargs)
 
-        self.cell = cell
+        self.backend_cell = cell
         self.initialize()
 
     def initialize(self):
 
-        if self.cell.value == 0:
+        if self.backend_cell.value == 0:
 
-            self.possible = self.cell.possible
+            self.possible = self.backend_cell.possible
             self.man_possible = set()
+            for labelid in self.ids:
+                self.ids[labelid].text = ''
 
         else:
-            self.update_solution(self.cell.value)
+            self.update_solution(self.backend_cell.value)
             # Turn the background color back to white
             self.color = [1, 1, 1, 1]
             self.ids.pos5.color = [1, 0, 1, 1]
@@ -68,9 +70,9 @@ class SudokuCell(ButtonBehavior, GridLayout):
             self.ids.pos5.text = ''
 
 
-class QuadrantGrid(GridLayout):
+class BoxGrid(GridLayout):
     def __init__(self, **kwargs):
-        super(QuadrantGrid, self).__init__(**kwargs)
+        super(BoxGrid, self).__init__(**kwargs)
 
 
 class SudokuGrid(GridLayout):
@@ -99,13 +101,12 @@ class SudokuPy(App):
         root_widget = BoxLayout(orientation='vertical', size_hint=(1, 1))
 
         # Build main puzzle interface
-
         interface = BoxLayout(orientation='horizontal', size_hint=(1, .7))
 
         # Build the sudoku grid and add it to the interface
         puzzle = SudokuGrid(size_hint=(3.5, 1))
-        for quad in range(9):
-            puzzle.add_widget(self.build_quad(quad))
+        for box in range(9):
+            puzzle.add_widget(self.build_box(box))
         interface.add_widget(puzzle)
 
         # Add the manual buttons
@@ -130,25 +131,32 @@ class SudokuPy(App):
         # Store a reference to the textinput for easy manipulation later
         self.textinput = root_widget.children[-1].children[-1]
 
+        # Initialize a solved value
+        self.solved = False
+
         return root_widget
 
-    def build_quad(self, quadnum):
-        quadrant = utils.get_quad(quadnum, self.sudoku)
+    def build_box(self, boxnum):
+        box = utils.get_box(boxnum, self.sudoku)
 
-        grid = QuadrantGrid()
+        grid = BoxGrid()
 
-        for _row in quadrant.itertuples(index=False):
-            for cell in _row:
-                cell.gui = SudokuCell(cell)
-                grid.add_widget(cell.gui)
-                self.cell_list.append(cell.gui)
+        for cell in utils.iter_box(box):
+            cell.gui = SudokuCell(cell)
+            grid.add_widget(cell.gui)
+            self.cell_list.append(cell.gui)
 
         return grid
 
-    # When solved button is press, create an event to cycle through the basic solutions
-
+    # When solved button is press, create an event to cycle through the smart solve steps
     def solve_sudoku(self, event):
-        self.basicsolve = Clock.schedule_interval(self.solve_step, 0.1)
+        
+        if not self.solved:
+
+            self.smartsolve = Clock.schedule_interval(self.solve_step, 0.1)
+        
+        else:
+            self.textinput.text = 'This is already solved, why would you want to solve again?'
 
     def solve_step(self, dt):
         # Erase any background colors left over
@@ -159,19 +167,20 @@ class SudokuPy(App):
         # If there is an error, immedately assign the proper error
         if errorcode == 1:
             self.error_possible()
-            self.basicsolve.cancel()
+            self.smartsolve.cancel()
         elif errorcode == 2:
             self.error_double_assign()
-            self.basicsolve.cancel()
+            self.smartsolve.cancel()
 
         # If nothing changed, validate the answer
         if not change:
             solved, error = solve.validate_answer(self.sudoku)
             if solved:
                 self.on_complete()
-                self.basicsolve.cancel()
+                self.smartsolve.cancel()
             elif error:
-                self.textinput.text = 'ERROR Double Assignment'
+                self.textinput.text = 'ERROR: Double Assignment'
+                self.smartsolve.cancel()
             else:
                 change, errorcode = solve.intermediate_check(
                     self.sudoku, change)
@@ -181,60 +190,85 @@ class SudokuPy(App):
                         self.sudoku, change)
                     if not change:
                         self.error_unsolved()
-                        self.basicsolve.cancel()
+                        self.smartsolve.cancel()
 
     def on_complete(self):
         # Set color to Green
         self.iter_cells_color([0, 1, 0, 1])
         self.textinput.text = 'SOLVED'
+        self.solved = True
 
     def error_unsolved(self):
         self.color_red()
-        self.textinput.text = 'ERROR Unable To Complete Puzzle, Try Backtrack'
+        self.textinput.text = 'ERROR: Unable To Complete Puzzle, Try Backtrack'
 
     def error_possible(self):
-        self.textinput.text = 'ERROR No Possible Solutions Left for Cell'
+        self.textinput.text = 'ERROR: No Possible Solutions Left for Cell'
 
     def error_double_assign(self):
-        self.textinput.text = 'ERROR Double Assignment'
+        self.textinput.text = 'ERROR: Double Assignment'
 
     def solve_backtrack(self, event):
-        self.clear_format()
-        self.clear_gui_possible()
-        # Start the recursive function at the first cell, going forward
-        self.backtrack_next = (0, 0)
-        self.forward = True
-        self.backtrack = Clock.schedule_interval(
-            self.backtrack_step, 0.0000001)
+        
+        if not self.solved:
+
+            self.clear_format()
+            self.clear_gui_possible()
+            # Start the recursive function at the first cell, going forward
+            self.backtrack_next = (0, 0)
+            self.forward = True
+            self.backtrack = Clock.schedule_interval(
+                self.backtrack_step, 0.0000001)
+        
+        else:
+            self.textinput.text = 'This is already solved, why would you want to solve again?'
 
     def backtrack_step(self, dt):
-        if self.backtrack_next != (None, None):
-            self.backtrack_next, self.forward = backtrack.backtrack(
-                self.sudoku, self.backtrack_next, self.forward)
-        else:
-            solved, error = solve.validate_answer(self.sudoku)
+        # If the backtrack is going backwards on the first cell, there is no possible solution
+        if self.backtrack_next == ('Beginning', 'Beginning'):
+            self.color_red()
+            self.textinput.text = 'ERROR: Backtrack Failed No Solution Possible'
+            self.backtrack.cancel()
+        # If the backtrack is complete, check to see if it is solved
+        elif self.backtrack_next == ('End', 'End'):
+            solved, _ = solve.validate_answer(self.sudoku)
             if solved:
                 self.on_complete()
             else:
                 self.textinput.text = 'ERROR: Backtrack Failed No Solution Possible'
                 self.color_red()
             self.backtrack.cancel()
+        else:
+            self.backtrack_next, self.forward = backtrack.backtrack(
+                self.sudoku, self.backtrack_next, self.forward)
+
 
     def manual_entry(self, cell):
         if self.entry != '':
             if self.pen:
-                # Assign the solution to the backend sudoku puzzle, not just the GUI element
-                cell.cell.assign_solution(int(self.entry))
-                cell.color = [1, 1, 1, 1]
-            elif self.pencil:
-                # Unlike with the pen, the pencil modifies a possible list that is only on the GUI element. It does not touch the backend
-                if self.entry in cell.man_possible:
-                    cell.man_possible.remove(int(self.entry))
-
+                if not cell.backend_cell.original:
+                    if cell.backend_cell.value == self.entry:
+                        cell.backend_cell.reinit()
+                    else:
+                        # Assign the solution to the backend sudoku puzzle, not just the GUI element
+                        cell.backend_cell.assign_solution(int(self.entry))
+                        cell.color = [1, 1, 1, 1]
                 else:
-                    cell.man_possible.add(int(self.entry))
+                    self.textinput.text = 'Cell is original, cannot be manually changed'
 
-                cell.update_possible(cell.man_possible)
+
+            elif self.pencil:
+                if not cell.backend_cell.solved:
+                    # Unlike with the pen, the pencil modifies a possible list that is only on the GUI element. It does not touch the backend
+                    if self.entry in cell.man_possible:
+                        cell.man_possible.remove(int(self.entry))
+
+                    else:
+                        cell.man_possible.add(int(self.entry))
+
+                    cell.update_possible(cell.man_possible)
+                else:
+                    self.textinput.text = 'Cannot pencil in possible answers for a solved cell'
 
     def change_entry(self, button):
         for but in button.parent.children:
@@ -267,22 +301,24 @@ class SudokuPy(App):
 
             entry = utils.entry_generator(self.textinput.text)
 
-            for row in self.sudoku.itertuples(index=False):
-                for i in range(len(row)):
-                    try:
-                        _value = int(next(entry))
-                    except:
-                        self.textinput.text = 'Entry not numbers'
-                        return None
-                    row[i].reinit()
-                    if _value != 0:
-                        row[i].assign_solution(_value)
-                        row[i].gui.color = [1, 1, 1, 1]
-                        row[i].gui.ids.pos5.color = [0, 0, 0, 1]
-                        row[i].mutable = False
-            print("Done")
+            for cell in utils.iter_box(self.sudoku):
+                try:
+                    _value = int(next(entry))
+                except:
+                    self.textinput.text = 'ERROR: Entry not numbers'
+                    return None
+                cell.reinit()
+                if _value != 0:
+                    cell.assign_solution(_value)
+                    cell.gui.color = [1, 1, 1, 1]
+                    cell.gui.ids.pos5.color = [0, 0, 0, 1]
+                    cell.mutable = False
+                    cell.original = True
+
+            self.solved = False
+
         else:
-            self.textinput.text = 'Entry not 81 characters'
+            self.textinput.text = 'ERROR: Entry not 81 characters'
 
     def clear_format(self):
         self.iter_cells_color([1, 1, 1, 1])
@@ -297,16 +333,14 @@ class SudokuPy(App):
     def clear_gui_possible(self):
         # Clear the possible pencil marks during backtracking
         for cell in self.cell_list:
-            if cell.cell.mutable:
+            if cell.backend_cell.mutable:
                 for child in cell.children:
                     child.text = ''
 
 
-sudoku = puzzle.build_sudoku(
-    "200000001003060008807031940002506070409800056100000380038670500705090263000004000")
-
-blank = puzzle.build_sudoku(
-    "000000000000000000000000000000000000000000000000000000000000000000000000000000000")
-
 if __name__ == '__main__':
+
+    blank = puzzle.build_sudoku(
+        "000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+
     SudokuPy(blank).run()

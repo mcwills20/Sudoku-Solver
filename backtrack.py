@@ -35,9 +35,9 @@ def backtrack(sudoku, cellref, forward):
 
     else:
         # If the cell is not mutable, go in the direction of the last call
-        if forward or cellref == (0, 0):
+        if forward:
             return cell.next, True,
-        elif not forward:
+        else:
             return cell.previous, False
 
 
@@ -52,7 +52,7 @@ def bt_check(sudoku, cell, value):
     if not safe:
         return safe, 0
 
-    safe = bt_check_quadrant(sudoku, cell, value)
+    safe = bt_check_box(sudoku, cell, value)
     if not safe:
         return safe, 0
     else:
@@ -81,14 +81,13 @@ def bt_check_column(sudoku, cell, value):
     return True
 
 
-def bt_check_quadrant(sudoku, cell, value):
+def bt_check_box(sudoku, cell, value):
 
-    quadrant = utils.get_quad(cell.quad, sudoku)
+    box = utils.get_box(cell.box, sudoku)
 
-    for row in quadrant.itertuples(index=False):
-        for check in row:
-            if check != cell and check.value != 0:
-                if check.value == value:
-                    return False
+    for check in utils.iter_box(box):
+        if check != cell and check.value != 0:
+            if check.value == value:
+                return False
 
     return True
