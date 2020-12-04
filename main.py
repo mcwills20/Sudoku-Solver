@@ -68,9 +68,9 @@ class SudokuCell(ButtonBehavior, GridLayout):
             self.ids.pos5.text = ''
 
 
-class QuadrantGrid(GridLayout):
+class BoxGrid(GridLayout):
     def __init__(self, **kwargs):
-        super(QuadrantGrid, self).__init__(**kwargs)
+        super(BoxGrid, self).__init__(**kwargs)
 
 
 class SudokuGrid(GridLayout):
@@ -104,8 +104,8 @@ class SudokuPy(App):
 
         # Build the sudoku grid and add it to the interface
         puzzle = SudokuGrid(size_hint=(3.5, 1))
-        for quad in range(9):
-            puzzle.add_widget(self.build_quad(quad))
+        for box in range(9):
+            puzzle.add_widget(self.build_box(box))
         interface.add_widget(puzzle)
 
         # Add the manual buttons
@@ -132,12 +132,12 @@ class SudokuPy(App):
 
         return root_widget
 
-    def build_quad(self, quadnum):
-        quadrant = utils.get_quad(quadnum, self.sudoku)
+    def build_box(self, boxnum):
+        box = utils.get_box(boxnum, self.sudoku)
 
-        grid = QuadrantGrid()
+        grid = BoxGrid()
 
-        for _row in quadrant.itertuples(index=False):
+        for _row in box.itertuples(index=False):
             for cell in _row:
                 cell.gui = SudokuCell(cell)
                 grid.add_widget(cell.gui)

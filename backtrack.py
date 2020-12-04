@@ -52,7 +52,7 @@ def bt_check(sudoku, cell, value):
     if not safe:
         return safe, 0
 
-    safe = bt_check_quadrant(sudoku, cell, value)
+    safe = bt_check_box(sudoku, cell, value)
     if not safe:
         return safe, 0
     else:
@@ -81,11 +81,11 @@ def bt_check_column(sudoku, cell, value):
     return True
 
 
-def bt_check_quadrant(sudoku, cell, value):
+def bt_check_box(sudoku, cell, value):
 
-    quadrant = utils.get_quad(cell.quad, sudoku)
+    box = utils.get_box(cell.box, sudoku)
 
-    for row in quadrant.itertuples(index=False):
+    for row in box.itertuples(index=False):
         for check in row:
             if check != cell and check.value != 0:
                 if check.value == value:

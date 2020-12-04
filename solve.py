@@ -15,7 +15,7 @@ def basic_check(sudoku, change):
         if change:
             return change, errorcode
     for i in range(9):
-        change, errorcode = bas_check_quad(i, sudoku, change)
+        change, errorcode = bas_check_box(i, sudoku, change)
         if change:
             return change, errorcode
 
@@ -52,16 +52,16 @@ def bas_check_column(colnum, sudoku, change):
     return change, errorcode
 
 
-def bas_check_quad(quad, sudoku, change):
+def bas_check_box(boxnum, sudoku, change):
     
-    # Slice the board into the correct quadrant
-    quadrant = utils.get_quad(quad, sudoku)
+    # Slice the board into the correct box
+    box = utils.get_box(boxnum, sudoku)
 
-    # Check which values exist in the quadrant
-    found = utils.check_values_quad(quadrant)
+    # Check which values exist in the box
+    found = utils.check_values_box(box)
     errorcode = 0
     # Assign the possible values. Found values cannot be possible
-    for row in quadrant.itertuples(index=False):
+    for row in box.itertuples(index=False):
         for cell in row:
             if not cell.solved:
                 change, errorcode = cell.assign_possible(found, change, sudoku)
@@ -84,7 +84,7 @@ def intermediate_check(sudoku, change):
         if change:
             return change, errorcode
     for i in range(9):
-        change, errorcode = int_check_quad(i, sudoku, change)
+        change, errorcode = int_check_box(i, sudoku, change)
         if change:
             return change, errorcode
 
@@ -153,22 +153,22 @@ def int_check_column(colnum, sudoku, change):
     return change, errorcode
 
 
-def int_check_quad(quad, sudoku, change):
+def int_check_box(boxnum, sudoku, change):
 
-    # Slice the board into the correct quadrant
-    quadrant = utils.get_quad(quad, sudoku)
+    # Slice the board into the correct box
+    box = utils.get_box(boxnum, sudoku)
 
-    found = utils.check_values_quad(quadrant)
+    found = utils.check_values_box(box)
     errorcode = 0
-    # Start checking the cells in the quadrant
-    for row in quadrant.itertuples(index=False):
+    # Start checking the cells in the box
+    for row in box.itertuples(index=False):
         for cell in row:
             if not cell.solved:
                 # Create a tempoarty list of possible values to check for
                 possible = cell.possible.difference(found)
 
                 # Loop through the other cells in the quardrant to find their possible values
-                for checkrow in quadrant.itertuples(index=False):
+                for checkrow in box.itertuples(index=False):
                     # Only check if the cell isn't solved and it isn't the cell we are comparing to
                     for checkcell in checkrow:
 
@@ -190,37 +190,37 @@ def int_check_quad(quad, sudoku, change):
 
 
 def cross_check(sudoku, change):
-    # Cross checks will compare the solution state of rows, columns, and quadrants to remove possible values
+    # Cross checks will compare the solution state of rows, columns, and boxes to remove possible values
     for i in range(9):
-        change, errorcode = quad_to_row_check(i, sudoku, change)
+        change, errorcode = box_to_row_check(i, sudoku, change)
         if change:
             return change, errorcode
     for i in range(9):
-        change, errorcode = quad_to_col_check(i, sudoku, change)
+        change, errorcode = box_to_col_check(i, sudoku, change)
         if change:
             return change, errorcode
     for i in range(9):
-        change, errorcode = row_to_quad_check(i, sudoku, change)
+        change, errorcode = row_to_box_check(i, sudoku, change)
         if change:
             return change, errorcode
     for i in range(9):
-        change, errorcode = col_to_quad_check(i, sudoku, change)
+        change, errorcode = col_to_box_check(i, sudoku, change)
         if change:
             return change, errorcode
 
     return change, errorcode
 
 
-def quad_to_row_check(quad, sudoku, change):
-    # Determines if two rows are solved in a particular quadrant, the unsolved row must contain the missing values
-    # Thus, you can remove these missing values from the cells located in this row in other quadrants
+def box_to_row_check(boxnum, sudoku, change):
+    # Determines if two rows are solved in a particular box, the unsolved row must contain the missing values
+    # Thus, you can remove these missing values from the cells located in this row in other boxes
 
-    quadrant = utils.get_quad(quad, sudoku)
+    box = utils.get_box(boxnum, sudoku)
     errorcode = 0
-    # Check to see if two rows are completed within the quad
+    # Check to see if two rows are completed within the box
     incomplete_rows = set()
 
-    for i, local_row in enumerate(quadrant.itertuples(index=False)):
+    for i, local_row in enumerate(box.itertuples(index=False)):
         row_complete = True
         for cell in local_row:
             if cell.value == 0:
@@ -231,27 +231,27 @@ def quad_to_row_check(quad, sudoku, change):
 
     if len(incomplete_rows) == 1:
         # Check which values to remove
-        found = utils.check_values_quad(quadrant)
+        found = utils.check_values_box(box)
         remove_pos = {1, 2, 3, 4, 5, 6, 7, 8, 9}.difference(found)
 
-        row = utils.eval_row(quad, incomplete_rows.pop())
+        row = utils.eval_row(boxnum, incomplete_rows.pop())
 
         for cell in sudoku.loc[row]:
-            if not cell.solved and cell.quad != quad:
+            if not cell.solved and cell.box != boxnum:
                 change, errorcode = cell.assign_possible(remove_pos, change, sudoku)
 
     return change, errorcode
 
 
-def quad_to_col_check(quad, sudoku, change):
-    # Determines if two columns are solved in a particular quadrant, the unsolved columns must contain the missing values
-    # Thus, you can remove these missing values from the cells located in this columns in other quadrants
+def box_to_col_check(boxnum, sudoku, change):
+    # Determines if two columns are solved in a particular box, the unsolved columns must contain the missing values
+    # Thus, you can remove these missing values from the cells located in this columns in other boxes
 
-    quadrant = utils.get_quad(quad, sudoku)
+    box = utils.get_box(boxnum, sudoku)
     errorcode = 0
     incomplete_cols = set()
 
-    for i, local_col in quadrant.iteritems():
+    for i, local_col in box.iteritems():
         col_complete = True
         for cell in local_col.values:
             if cell.value == 0:
@@ -261,35 +261,35 @@ def quad_to_col_check(quad, sudoku, change):
             incomplete_cols.add(i)
 
     if len(incomplete_cols) == 1:
-        found = utils.check_values_quad(quadrant)
+        found = utils.check_values_box(box)
         remove_pos = {1, 2, 3, 4, 5, 6, 7, 8, 9}.difference(found)
 
         column = incomplete_cols.pop()
         
         for cell in sudoku.loc[:, column]:
-            if not cell.solved and cell.quad != quad:
+            if not cell.solved and cell.box != boxnum:
                 change, errorcode = cell.assign_possible(remove_pos, change, sudoku)
 
     return change, errorcode
 
 
-def row_to_quad_check(rownum, sudoku, change):
-    # Determines, within a row, if 2 quadrants have been completed. If they have, the outstanding values in that row must be placed in the remaining
-    # cells in the row. Thus it is not possible to place them in any other location in that quadrant.
+def row_to_box_check(rownum, sudoku, change):
+    # Determines, within a row, if 2 boxes have been completed. If they have, the outstanding values in that row must be placed in the remaining
+    # cells in the row. Thus it is not possible to place them in any other location in that box.
 
     found = utils.check_values(sudoku.loc[rownum])
     errorcode = 0
-    # Only check if 6 or more values have been filled in, as any less means 2 quadrants couldn't have been solved
+    # Only check if 6 or more values have been filled in, as any less means 2 boxes couldn't have been solved
     if len(found) > 5:
 
-        incompleted_quads = utils.eval_quads(sudoku.loc[rownum])
+        incompleted_boxes = utils.eval_boxes(sudoku.loc[rownum])
 
-        if len(incompleted_quads) == 1:
+        if len(incompleted_boxes) == 1:
 
             remove_pos = {1, 2, 3, 4, 5, 6, 7, 8, 9}.difference(found)
-            quadrant = utils.get_quad(incompleted_quads.pop(), sudoku)
+            box = utils.get_box(incompleted_boxes.pop(), sudoku)
 
-            for row in quadrant.itertuples(index=False):
+            for row in box.itertuples(index=False):
                 for cell in row:
                     if not cell.solved and cell.row != rownum:
                         change, errorcode = cell.assign_possible(remove_pos, change, sudoku)
@@ -297,22 +297,22 @@ def row_to_quad_check(rownum, sudoku, change):
     return change, errorcode
 
 
-def col_to_quad_check(colnum, sudoku, change):
-    # Determines, within a column, if 2 quadrants have been completed. If they have, the outstanding values in that column must be placed in the remaining
-    # cells in the column. Thus it is not possible to place them in any other location in that quadrant.
+def col_to_box_check(colnum, sudoku, change):
+    # Determines, within a column, if 2 boxes have been completed. If they have, the outstanding values in that column must be placed in the remaining
+    # cells in the column. Thus it is not possible to place them in any other location in that box.
 
     found = utils.check_values(sudoku.loc[:, colnum])
     errorcode = 0
     if len(found) > 5:
 
-        incompleted_quads = utils.eval_quads(sudoku.loc[:, colnum])
+        incompleted_boxes = utils.eval_boxes(sudoku.loc[:, colnum])
 
-        if len(incompleted_quads) == 1:
+        if len(incompleted_boxes) == 1:
 
             remove_pos = {1, 2, 3, 4, 5, 6, 7, 8, 9}.difference(found)
-            quadrant = utils.get_quad(incompleted_quads.pop(), sudoku)
+            box = utils.get_box(incompleted_boxes.pop(), sudoku)
 
-            for column in quadrant.itertuples(index=False):
+            for column in box.itertuples(index=False):
                 for cell in column:
                     if not cell.solved and cell.column != colnum:
                         change, errorcode = cell.assign_possible(remove_pos, change, sudoku)
@@ -341,7 +341,7 @@ def validate_answer(sudoku, final = False):
 
     solved, error = validate_columns(sudoku, solved)
 
-    solved, error = validate_quadrants(sudoku, solved)
+    solved, error = validate_boxes(sudoku, solved)
 
     return solved, error
 
@@ -363,15 +363,15 @@ def validate_region(region, solved):
 
     return solved, error
 
-def validate_quadrant(quadrant, solved):
+def validate_box(box, solved):
 
     found = set()
     error = False
-    for row in quadrant.itertuples(index = False):
+    for row in box.itertuples(index = False):
         for cell in row:
             if cell.value in found:
                 error = True
-                utils.color_red_quad(quadrant)
+                utils.color_red_box(box)
             elif cell.value != 0:
                 found.add(cell.value)
     
@@ -403,11 +403,11 @@ def validate_columns(sudoku, solved):
     return solved, error
 
 
-def validate_quadrants(sudoku, solved):
+def validate_boxes(sudoku, solved):
 
-    for quad in range(9):
-        quadrant = utils.get_quad(quad, sudoku)
-        solved, error = validate_quadrant(quadrant, solved)
+    for boxnum in range(9):
+        box = utils.get_box(boxnum, sudoku)
+        solved, error = validate_box(box, solved)
         
         if error:
             return solved, error
