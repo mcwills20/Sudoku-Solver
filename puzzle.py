@@ -63,9 +63,11 @@ class Cell(object):
     def init_possible(self):
         if self.value == 0:
             self.solved = False
+            self.original = False
             self.possible = set([i for i in range(1, 10)])
         else:
             self.solved = True
+            self.original = True
             self.possible = set([self.value])
 
     def assign_possible(self, found, change, sudoku):
@@ -133,6 +135,7 @@ class Cell(object):
         self.value = 0
         self.gui.value = 0
         self.mutable = True
+        self.original = False
         self.new = True
         self.tpossible = set()
         self.gui.ids.pos5.font_size = 15

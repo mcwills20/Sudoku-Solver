@@ -35,6 +35,8 @@ class SudokuCell(ButtonBehavior, GridLayout):
 
             self.possible = self.cell.possible
             self.man_possible = set()
+            for labelid in self.ids:
+                self.ids[labelid].text = ''
 
         else:
             self.update_solution(self.cell.value)
@@ -244,18 +246,29 @@ class SudokuPy(App):
     def manual_entry(self, cell):
         if self.entry != '':
             if self.pen:
-                # Assign the solution to the backend sudoku puzzle, not just the GUI element
-                cell.cell.assign_solution(int(self.entry))
-                cell.color = [1, 1, 1, 1]
-            elif self.pencil:
-                # Unlike with the pen, the pencil modifies a possible list that is only on the GUI element. It does not touch the backend
-                if self.entry in cell.man_possible:
-                    cell.man_possible.remove(int(self.entry))
-
+                if not cell.cell.original:
+                    if cell.cell.value == self.entry:
+                        cell.cell.reinit()
+                    else:
+                        # Assign the solution to the backend sudoku puzzle, not just the GUI element
+                        cell.cell.assign_solution(int(self.entry))
+                        cell.color = [1, 1, 1, 1]
                 else:
-                    cell.man_possible.add(int(self.entry))
+                    self.textinput.text = 'Cell is original, cannot be manually changed'
 
-                cell.update_possible(cell.man_possible)
+
+            elif self.pencil:
+                if not cell.cell.solved:
+                    # Unlike with the pen, the pencil modifies a possible list that is only on the GUI element. It does not touch the backend
+                    if self.entry in cell.man_possible:
+                        cell.man_possible.remove(int(self.entry))
+
+                    else:
+                        cell.man_possible.add(int(self.entry))
+
+                    cell.update_possible(cell.man_possible)
+                else:
+                    self.textinput.text = 'Cannot pencil in possible answers for a solved cell'
 
     def change_entry(self, button):
         for but in button.parent.children:
@@ -288,20 +301,20 @@ class SudokuPy(App):
 
             entry = utils.entry_generator(self.textinput.text)
 
-            for row in self.sudoku.itertuples(index=False):
-                for i in range(len(row)):
-                    try:
-                        _value = int(next(entry))
-                    except:
-                        self.textinput.text = 'ERROR: Entry not numbers'
-                        return None
-                    row[i].reinit()
-                    if _value != 0:
-                        row[i].assign_solution(_value)
-                        row[i].gui.color = [1, 1, 1, 1]
-                        row[i].gui.ids.pos5.color = [0, 0, 0, 1]
-                        row[i].mutable = False
-            
+            for cell in utils.iter_box(self.sudoku):
+                try:
+                    _value = int(next(entry))
+                except:
+                    self.textinput.text = 'ERROR: Entry not numbers'
+                    return None
+                cell.reinit()
+                if _value != 0:
+                    cell.assign_solution(_value)
+                    cell.gui.color = [1, 1, 1, 1]
+                    cell.gui.ids.pos5.color = [0, 0, 0, 1]
+                    cell.mutable = False
+                    cell.original = True
+
             self.solved = False
 
         else:
