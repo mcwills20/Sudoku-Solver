@@ -331,6 +331,40 @@ def validate_answer(sudoku, final=False):
     return solved, error
 
 
+def validate_rows(sudoku, solved):
+
+    for rownum in range(9):
+        solved, error = validate_region(sudoku.loc[rownum], solved)
+
+        if error:
+            return solved, error
+
+    return solved, error
+
+
+def validate_columns(sudoku, solved):
+
+    for colnum in range(9):
+        solved, error = validate_region(sudoku.loc[:, colnum], solved)
+
+        if error:
+            return solved, error
+
+    return solved, error
+
+
+def validate_boxes(sudoku, solved):
+
+    for boxnum in range(9):
+        box = utils.get_box(boxnum, sudoku)
+        solved, error = validate_box(box, solved)
+
+        if error:
+            return solved, error
+
+    return solved, error
+
+
 def validate_region(region, solved):
 
     found = set()
@@ -363,39 +397,5 @@ def validate_box(box, solved):
     # Solved by default is true during the validate_answer call. If all 9 values are not found, then it is not solved
     if len(found) != 9:
         solved = False
-
-    return solved, error
-
-
-def validate_rows(sudoku, solved):
-
-    for rownum in range(9):
-        solved, error = validate_region(sudoku.loc[rownum], solved)
-
-        if error:
-            return solved, error
-
-    return solved, error
-
-
-def validate_columns(sudoku, solved):
-
-    for colnum in range(9):
-        solved, error = validate_region(sudoku.loc[:, colnum], solved)
-
-        if error:
-            return solved, error
-
-    return solved, error
-
-
-def validate_boxes(sudoku, solved):
-
-    for boxnum in range(9):
-        box = utils.get_box(boxnum, sudoku)
-        solved, error = validate_box(box, solved)
-
-        if error:
-            return solved, error
 
     return solved, error
