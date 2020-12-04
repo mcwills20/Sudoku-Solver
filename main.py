@@ -99,7 +99,6 @@ class SudokuPy(App):
         root_widget = BoxLayout(orientation='vertical', size_hint=(1, 1))
 
         # Build main puzzle interface
-
         interface = BoxLayout(orientation='horizontal', size_hint=(1, .7))
 
         # Build the sudoku grid and add it to the interface
@@ -144,10 +143,9 @@ class SudokuPy(App):
 
         return grid
 
-    # When solved button is press, create an event to cycle through the basic solutions
-
+    # When solved button is press, create an event to cycle through the smart solve steps
     def solve_sudoku(self, event):
-        self.basicsolve = Clock.schedule_interval(self.solve_step, 0.1)
+        self.smartsolve = Clock.schedule_interval(self.solve_step, 0.1)
 
     def solve_step(self, dt):
         # Erase any background colors left over
@@ -158,19 +156,20 @@ class SudokuPy(App):
         # If there is an error, immedately assign the proper error
         if errorcode == 1:
             self.error_possible()
-            self.basicsolve.cancel()
+            self.smartsolve.cancel()
         elif errorcode == 2:
             self.error_double_assign()
-            self.basicsolve.cancel()
+            self.smartsolve.cancel()
 
         # If nothing changed, validate the answer
         if not change:
             solved, error = solve.validate_answer(self.sudoku)
             if solved:
                 self.on_complete()
-                self.basicsolve.cancel()
+                self.smartsolve.cancel()
             elif error:
                 self.textinput.text = 'ERROR Double Assignment'
+                self.smartsolve.cancel()
             else:
                 change, errorcode = solve.intermediate_check(
                     self.sudoku, change)
@@ -180,7 +179,7 @@ class SudokuPy(App):
                         self.sudoku, change)
                     if not change:
                         self.error_unsolved()
-                        self.basicsolve.cancel()
+                        self.smartsolve.cancel()
 
     def on_complete(self):
         # Set color to Green
