@@ -1,7 +1,5 @@
 import solve_utils as utils
 
-from copy import deepcopy
-
 
 def basic_check(sudoku, change):
     # Basic checks compare the value of other cells in the region. They remove all values found from the possible
@@ -209,18 +207,13 @@ def box_to_row_check(boxnum, sudoku, change):
             incomplete_rows.add(i)
 
     if len(incomplete_rows) == 1:
-        # Check which values to remove
-        found = utils.check_values_box(box)
-        remove_pos = {1, 2, 3, 4, 5, 6, 7, 8, 9}.difference(found)
 
-        row = utils.eval_row(boxnum, incomplete_rows.pop())
+        row = sudoku.loc[utils.eval_row(boxnum, incomplete_rows.pop())]
 
-        for cell in sudoku.loc[row]:
-            if not cell.solved and cell.box != boxnum:
-                change, errorcode = cell.assign_possible(
-                    remove_pos, change, sudoku)
+        return remove_from_other_boxes(row, box, boxnum, change, sudoku)
 
-    return change, errorcode
+    else:
+        return change, errorcode
 
 
 def box_to_col_check(boxnum, sudoku, change):
@@ -241,22 +234,33 @@ def box_to_col_check(boxnum, sudoku, change):
             incomplete_cols.add(i)
 
     if len(incomplete_cols) == 1:
-        found = utils.check_values_box(box)
-        remove_pos = {1, 2, 3, 4, 5, 6, 7, 8, 9}.difference(found)
 
-        column = incomplete_cols.pop()
+        column = sudoku.loc[:, incomplete_cols.pop()]
 
-        for cell in sudoku.loc[:, column]:
-            if not cell.solved and cell.box != boxnum:
-                change, errorcode = cell.assign_possible(
-                    remove_pos, change, sudoku)
+        return remove_from_other_boxes(column, box, boxnum, change, sudoku)
+
+    else:
+        return change, errorcode
+
+
+def remove_from_other_boxes(region, box, boxnum, change, sudoku):
+
+    errorcode = 0
+
+    found = utils.check_values_box(box)
+    remove_pos = {1, 2, 3, 4, 5, 6, 7, 8, 9}.difference(found)
+
+    for cell in region:
+        if not cell.solved and cell.box != boxnum:
+            change, errorcode = cell.assign_possible(
+                remove_pos, change, sudoku)
 
     return change, errorcode
 
 
 def row_to_box_check(rownum, sudoku, change):
     # Determines, within a row, if 2 boxes have been completed. If they have, the outstanding values in that row must be placed in the remaining
-    # cells in the row. Thus it is not possible to place them in any other location in that box.
+    # cells in the row. Thus it is not possible to place them in any other location in that box, so remove them from the possible values of other cells in that box
 
     found = utils.check_values(sudoku.loc[rownum])
     errorcode = 0
@@ -280,7 +284,7 @@ def row_to_box_check(rownum, sudoku, change):
 
 def col_to_box_check(colnum, sudoku, change):
     # Determines, within a column, if 2 boxes have been completed. If they have, the outstanding values in that column must be placed in the remaining
-    # cells in the column. Thus it is not possible to place them in any other location in that box.
+    # cells in the column. Thus it is not possible to place them in any other location in that box, so remove them from the possible values of other cells in that box
 
     found = utils.check_values(sudoku.loc[:, colnum])
     errorcode = 0
@@ -302,7 +306,7 @@ def col_to_box_check(colnum, sudoku, change):
 
 
 def compare_answer(sudoku, solution):
-    # Function to compare the answer to the solved puzzle
+    # Function to compare the answer to the solved puzzle. Current not in use
     solved = True
 
     for rownum in range(9):
