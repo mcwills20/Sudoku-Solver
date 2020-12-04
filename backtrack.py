@@ -85,10 +85,9 @@ def bt_check_box(sudoku, cell, value):
 
     box = utils.get_box(cell.box, sudoku)
 
-    for row in box.itertuples(index=False):
-        for check in row:
-            if check != cell and check.value != 0:
-                if check.value == value:
-                    return False
+    for check in utils.iter_box(box):
+        if check != cell and check.value != 0:
+            if check.value == value:
+                return False
 
     return True

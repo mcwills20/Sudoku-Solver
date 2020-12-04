@@ -112,3 +112,8 @@ def color_green_box(box):
 def entry_generator(entry):
     for i in range(81):
         yield entry[i]
+
+def iter_box(box):
+    for row in box.itertuples(index = False):
+        for cell in row:
+            yield cell

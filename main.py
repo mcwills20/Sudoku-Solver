@@ -137,11 +137,10 @@ class SudokuPy(App):
 
         grid = BoxGrid()
 
-        for _row in box.itertuples(index=False):
-            for cell in _row:
-                cell.gui = SudokuCell(cell)
-                grid.add_widget(cell.gui)
-                self.cell_list.append(cell.gui)
+        for cell in utils.iter_box(box):
+            cell.gui = SudokuCell(cell)
+            grid.add_widget(cell.gui)
+            self.cell_list.append(cell.gui)
 
         return grid
 
@@ -280,7 +279,7 @@ class SudokuPy(App):
                         row[i].gui.color = [1, 1, 1, 1]
                         row[i].gui.ids.pos5.color = [0, 0, 0, 1]
                         row[i].mutable = False
-            print("Done")
+
         else:
             self.textinput.text = 'Entry not 81 characters'
 

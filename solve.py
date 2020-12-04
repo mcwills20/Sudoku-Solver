@@ -8,7 +8,7 @@ def basic_check(sudoku, change):
     for i in range(9):
         change, errorcode = bas_check_row(i, sudoku, change)
         # Once one cell is solved, break out of the loop so the GUI updates
-        if change:          
+        if change:
             return change, errorcode
     for i in range(9):
         change, errorcode = bas_check_column(i, sudoku, change)
@@ -53,7 +53,7 @@ def bas_check_column(colnum, sudoku, change):
 
 
 def bas_check_box(boxnum, sudoku, change):
-    
+
     # Slice the board into the correct box
     box = utils.get_box(boxnum, sudoku)
 
@@ -61,12 +61,11 @@ def bas_check_box(boxnum, sudoku, change):
     found = utils.check_values_box(box)
     errorcode = 0
     # Assign the possible values. Found values cannot be possible
-    for row in box.itertuples(index=False):
-        for cell in row:
-            if not cell.solved:
-                change, errorcode = cell.assign_possible(found, change, sudoku)
-                if change:
-                    return change, errorcode
+    for cell in utils.iter_box(box):
+        if not cell.solved:
+            change, errorcode = cell.assign_possible(found, change, sudoku)
+            if change:
+                return change, errorcode
 
     return change, errorcode
 
@@ -161,30 +160,29 @@ def int_check_box(boxnum, sudoku, change):
     found = utils.check_values_box(box)
     errorcode = 0
     # Start checking the cells in the box
-    for row in box.itertuples(index=False):
-        for cell in row:
-            if not cell.solved:
-                # Create a tempoarty list of possible values to check for
-                possible = cell.possible.difference(found)
+    for cell in utils.iter_box(box):
+        if not cell.solved:
+            # Create a tempoarty list of possible values to check for
+            possible = cell.possible.difference(found)
 
-                # Loop through the other cells in the quardrant to find their possible values
-                for checkrow in box.itertuples(index=False):
+            # Loop through the other cells in the quardrant to find their possible values
+            for checkrow in box.itertuples(index=False):
+                # Only check if the cell isn't solved and it isn't the cell we are comparing to
+                for checkcell in checkrow:
+
                     # Only check if the cell isn't solved and it isn't the cell we are comparing to
-                    for checkcell in checkrow:
+                    if not checkcell.solved and cell != checkcell:
+                        for pos in checkcell.possible:
+                            # If there is a value that is in the source possible list, remove it
+                            if pos in possible:
+                                possible.remove(pos)
 
-                        # Only check if the cell isn't solved and it isn't the cell we are comparing to
-                        if not checkcell.solved and cell != checkcell:
-                            for pos in checkcell.possible:
-                                # If there is a value that is in the source possible list, remove it
-                                if pos in possible:
-                                    possible.remove(pos)
-
-                # If there is only one possible solution left, that must be the solution for this cell
-                if len(possible) == 1:
-                    cell.possible = possible.copy()
-                    change, errorcode = cell.check_solved(change, sudoku)
-                    if change:
-                        return change, errorcode
+            # If there is only one possible solution left, that must be the solution for this cell
+            if len(possible) == 1:
+                cell.possible = possible.copy()
+                change, errorcode = cell.check_solved(change, sudoku)
+                if change:
+                    return change, errorcode
 
     return change, errorcode
 
@@ -238,7 +236,8 @@ def box_to_row_check(boxnum, sudoku, change):
 
         for cell in sudoku.loc[row]:
             if not cell.solved and cell.box != boxnum:
-                change, errorcode = cell.assign_possible(remove_pos, change, sudoku)
+                change, errorcode = cell.assign_possible(
+                    remove_pos, change, sudoku)
 
     return change, errorcode
 
@@ -265,10 +264,11 @@ def box_to_col_check(boxnum, sudoku, change):
         remove_pos = {1, 2, 3, 4, 5, 6, 7, 8, 9}.difference(found)
 
         column = incomplete_cols.pop()
-        
+
         for cell in sudoku.loc[:, column]:
             if not cell.solved and cell.box != boxnum:
-                change, errorcode = cell.assign_possible(remove_pos, change, sudoku)
+                change, errorcode = cell.assign_possible(
+                    remove_pos, change, sudoku)
 
     return change, errorcode
 
@@ -289,10 +289,10 @@ def row_to_box_check(rownum, sudoku, change):
             remove_pos = {1, 2, 3, 4, 5, 6, 7, 8, 9}.difference(found)
             box = utils.get_box(incompleted_boxes.pop(), sudoku)
 
-            for row in box.itertuples(index=False):
-                for cell in row:
-                    if not cell.solved and cell.row != rownum:
-                        change, errorcode = cell.assign_possible(remove_pos, change, sudoku)
+            for cell in utils.iter_box(box):
+                if not cell.solved and cell.row != rownum:
+                    change, errorcode = cell.assign_possible(
+                        remove_pos, change, sudoku)
 
     return change, errorcode
 
@@ -312,10 +312,9 @@ def col_to_box_check(colnum, sudoku, change):
             remove_pos = {1, 2, 3, 4, 5, 6, 7, 8, 9}.difference(found)
             box = utils.get_box(incompleted_boxes.pop(), sudoku)
 
-            for column in box.itertuples(index=False):
-                for cell in column:
-                    if not cell.solved and cell.column != colnum:
-                        change, errorcode = cell.assign_possible(remove_pos, change, sudoku)
+            for cell in utils.iter_box(box):
+                if not cell.solved and cell.column != colnum:
+                    change, errorcode = cell.assign_possible(remove_pos, change, sudoku)
 
     return change, errorcode
 
@@ -332,7 +331,7 @@ def compare_answer(sudoku, solution):
     return solved
 
 
-def validate_answer(sudoku, final = False):
+def validate_answer(sudoku, final=False):
     # Function to validate the answer if the solution is not known
 
     solved = True
@@ -363,23 +362,24 @@ def validate_region(region, solved):
 
     return solved, error
 
+
 def validate_box(box, solved):
 
     found = set()
     error = False
-    for row in box.itertuples(index = False):
-        for cell in row:
-            if cell.value in found:
-                error = True
-                utils.color_red_box(box)
-            elif cell.value != 0:
-                found.add(cell.value)
-    
+    for cell in utils.iter_box(box):
+        if cell.value in found:
+            error = True
+            utils.color_red_box(box)
+        elif cell.value != 0:
+            found.add(cell.value)
+
     # Solved by default is true during the validate_answer call. If all 9 values are not found, then it is not solved
     if len(found) != 9:
         solved = False
 
     return solved, error
+
 
 def validate_rows(sudoku, solved):
 
@@ -388,7 +388,6 @@ def validate_rows(sudoku, solved):
         if error:
             return solved, error
 
-
     return solved, error
 
 
@@ -396,7 +395,7 @@ def validate_columns(sudoku, solved):
 
     for colnum in range(9):
         solved, error = validate_region(sudoku.loc[:, colnum], solved)
-        
+
         if error:
             return solved, error
 
@@ -408,7 +407,7 @@ def validate_boxes(sudoku, solved):
     for boxnum in range(9):
         box = utils.get_box(boxnum, sudoku)
         solved, error = validate_box(box, solved)
-        
+
         if error:
             return solved, error
 
