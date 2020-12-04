@@ -35,9 +35,9 @@ def backtrack(sudoku, cellref, forward):
 
     else:
         # If the cell is not mutable, go in the direction of the last call
-        if forward or cellref == (0, 0):
+        if forward:
             return cell.next, True,
-        elif not forward:
+        else:
             return cell.previous, False
 
 

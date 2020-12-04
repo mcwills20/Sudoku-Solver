@@ -207,17 +207,23 @@ class SudokuPy(App):
             self.backtrack_step, 0.0000001)
 
     def backtrack_step(self, dt):
-        if self.backtrack_next != (None, None):
-            self.backtrack_next, self.forward = backtrack.backtrack(
-                self.sudoku, self.backtrack_next, self.forward)
-        else:
-            solved, error = solve.validate_answer(self.sudoku)
+        # If the backtrack is going backwards on the first cell, there is no possible solution
+        if self.backtrack_next == ('Beginning', 'Beginning'):
+            self.color_red()
+            self.textinput.text = 'ERROR: Backtrack Failed No Solution Possible'
+            self.backtrack.cancel()
+        # If the backtrack is complete, check to see if it is solved
+        elif self.backtrack_next == ('End', 'End'):
+            solved, _ = solve.validate_answer(self.sudoku)
             if solved:
                 self.on_complete()
             else:
                 self.textinput.text = 'ERROR: Backtrack Failed No Solution Possible'
                 self.color_red()
             self.backtrack.cancel()
+        else:
+            self.backtrack_next, self.forward = backtrack.backtrack(
+                self.sudoku, self.backtrack_next, self.forward)
 
     def manual_entry(self, cell):
         if self.entry != '':

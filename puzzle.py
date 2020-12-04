@@ -145,7 +145,7 @@ class Cell(object):
     def assign_next(self):
 
         if self.row == 8 and self.column == 8:
-            self.next = (None, None)
+            self.next = ('End', 'End')
         
         elif self.column == 8:
             self.next = (self.row + 1, 0)
@@ -156,7 +156,7 @@ class Cell(object):
     def assign_previous(self):
 
         if self.row == 0 and self.column == 0:
-            self.previous =  (None, None)
+            self.previous =  ('Beginning', 'Beginning')
         
         elif self.column == 0:
             self.previous = (self.row - 1, 8)
