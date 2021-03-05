@@ -1,6 +1,5 @@
 import solve
 import solve_utils as utils
-import puzzle
 
 
 def backtrack(sudoku, cellref, forward):

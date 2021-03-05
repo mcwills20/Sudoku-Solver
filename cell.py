@@ -2,27 +2,27 @@ import pandas as pd
 import solve_utils as utils
 import solve
 
+
 class Cell(object):
 
     def __init__(self, value, row, column):
         self.value = value
         self.row = row
         self.column = column
-        
-        
+
         # Find the index of the GUI interface
         self.gui = None
         # Get what box the cell is in. Useful for checking later
         self.box = self.init_box()
         # Initialize the possible list
         self.init_possible()
-        
+
         # Assign values for backtracking
         self.assign_next()
         self.assign_previous()
         self.mutable = self.value == 0
         self.new = True
-        
+
     # When printing, display the value
     def __repr__(self):
         return str(self.value)
@@ -149,36 +149,20 @@ class Cell(object):
 
         if self.row == 8 and self.column == 8:
             self.next = ('End', 'End')
-        
+
         elif self.column == 8:
             self.next = (self.row + 1, 0)
-        
+
         else:
             self.next = (self.row, self.column + 1)
 
     def assign_previous(self):
 
         if self.row == 0 and self.column == 0:
-            self.previous =  ('Beginning', 'Beginning')
-        
+            self.previous = ('Beginning', 'Beginning')
+
         elif self.column == 0:
             self.previous = (self.row - 1, 8)
-        
+
         else:
-            self.previous = (self.row, self.column -1)
-
-def build_sudoku(raw):
-    # cast the raw data (which should be a string of numbers with no delimination) into a list for easier sorting
-    lis = list(raw)
-    # initialize a temporary formatted list. 9 Lists (the rows) of 9 numbers each will be put into this list
-    formattedlis = []
-    for i in range(0, 81, 9):
-        formattedlis.append(lis[i:i+9])
-
-    # covert the lists from the raw values into the Cell object types
-    for rownum, row in enumerate(formattedlis):
-        for colnum, val in enumerate(row):
-            formattedlis[rownum][colnum] = Cell(int(val), rownum, colnum)
-
-    # use the final list to return a pandas dataframe with the Cell objects
-    return pd.DataFrame(formattedlis)
+            self.previous = (self.row, self.column - 1)
