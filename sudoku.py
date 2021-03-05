@@ -343,7 +343,7 @@ class Sudoku(object):
     def validate_rows(self, solved):
 
         for rownum in range(9):
-            solved, error = self.validate_region(
+            solved, error = utils.validate_region(
                 self.sudoku.loc[rownum], solved)
 
             if error:
@@ -354,7 +354,7 @@ class Sudoku(object):
     def validate_columns(self, solved):
 
         for colnum in range(9):
-            solved, error = self.validate_region(
+            solved, error = utils.validate_region(
                 self.sudoku.loc[:, colnum], solved)
 
             if error:
@@ -366,43 +366,9 @@ class Sudoku(object):
 
         for boxnum in range(9):
             box = utils.get_box(boxnum, self.sudoku)
-            solved, error = self.validate_box(box, solved)
+            solved, error = utils.validate_box(box, solved)
 
             if error:
                 return solved, error
-
-        return solved, error
-
-    def validate_region(self, region, solved):
-
-        found = set()
-        error = False
-        for cell in region:
-            if cell.value in found:
-                error = True
-                utils.color_red(region)
-            elif cell.value != 0:
-                found.add(cell.value)
-
-        # Solved by default is true during the validate_answer call. If all 9 values are not found, then it is not solved
-        if len(found) != 9:
-            solved = False
-
-        return solved, error
-
-    def validate_box(self, box, solved):
-
-        found = set()
-        error = False
-        for cell in utils.iter_box(box):
-            if cell.value in found:
-                error = True
-                utils.color_red_box(box)
-            elif cell.value != 0:
-                found.add(cell.value)
-
-        # Solved by default is true during the validate_answer call. If all 9 values are not found, then it is not solved
-        if len(found) != 9:
-            solved = False
 
         return solved, error

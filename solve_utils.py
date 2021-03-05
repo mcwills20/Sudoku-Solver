@@ -67,6 +67,42 @@ def check_values_box(box):
     return set(found)
 
 
+def validate_region(region, solved):
+
+    found = set()
+    error = False
+    for cell in region:
+        if cell.value in found:
+            error = True
+            color_red(region)
+        elif cell.value != 0:
+            found.add(cell.value)
+
+    # Solved by default is true during the validate_answer call. If all 9 values are not found, then it is not solved
+    if len(found) != 9:
+        solved = False
+
+    return solved, error
+
+
+def validate_box(box, solved):
+
+    found = set()
+    error = False
+    for cell in iter_box(box):
+        if cell.value in found:
+            error = True
+            color_red_box(box)
+        elif cell.value != 0:
+            found.add(cell.value)
+
+    # Solved by default is true during the validate_answer call. If all 9 values are not found, then it is not solved
+    if len(found) != 9:
+        solved = False
+
+    return solved, error
+
+
 def get_box(boxnum, sudoku):
     # Function to slice the Sudoku Puzzle into a box
     if boxnum == 0:
@@ -94,26 +130,31 @@ def color_red(region):
     for cell in region:
         cell.gui.color = [1, 0, 0, 1]
 
+
 def color_green(region):
 
     for cell in region:
         cell.gui.color = [0, 1, 0, 1]
 
+
 def color_red_box(box):
-    for row in box.itertuples(index = False):
+    for row in box.itertuples(index=False):
         for cell in row:
             cell.gui.color = [1, 0, 0, 1]
 
+
 def color_green_box(box):
-    for row in box.itertuples(index = False):
+    for row in box.itertuples(index=False):
         for cell in row:
             cell.gui.color = [0, 1, 0, 1]
+
 
 def entry_generator(entry):
     for i in range(81):
         yield entry[i]
 
+
 def iter_box(box):
-    for row in box.itertuples(index = False):
+    for row in box.itertuples(index=False):
         for cell in row:
             yield cell

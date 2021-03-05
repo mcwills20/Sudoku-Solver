@@ -1,6 +1,5 @@
 import pandas as pd
 import solve_utils as utils
-import solve
 
 
 class Cell(object):
@@ -121,12 +120,12 @@ class Cell(object):
     def check_double(self, sudoku):
 
         # Check Row
-        _, errorrow = solve.validate_region(sudoku.loc[self.row], True)
+        _, errorrow = utils.validate_region(sudoku.loc[self.row], True)
         # Check Column
-        _, errorcol = solve.validate_region(sudoku.loc[:, self.column], True)
+        _, errorcol = utils.validate_region(sudoku.loc[:, self.column], True)
         # Check box
         box = utils.get_box(self.box, sudoku)
-        _, errorbox = solve.validate_box(box, True)
+        _, errorbox = utils.validate_box(box, True)
 
         return errorrow or errorcol or errorbox
 
