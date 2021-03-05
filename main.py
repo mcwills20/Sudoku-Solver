@@ -1,7 +1,6 @@
-import puzzle
-import solve
 import solve_utils as utils
 import backtrack
+import sudoku
 
 from kivy.app import App
 from kivy.uix.button import Button
@@ -132,7 +131,7 @@ class SudokuPy(App):
         return root_widget
 
     def build_box(self, boxnum):
-        box = utils.get_box(boxnum, self.sudoku)
+        box = utils.get_box(boxnum, self.sudoku.sudoku)
 
         grid = BoxGrid()
 
@@ -145,11 +144,11 @@ class SudokuPy(App):
 
     # When solved button is press, create an event to cycle through the smart solve steps
     def solve_sudoku(self, event):
-        
+
         if not self.solved:
 
             self.smartsolve = Clock.schedule_interval(self.solve_step, 0.1)
-        
+
         else:
             self.textinput.text = 'This is already solved, why would you want to solve again?'
 
@@ -157,7 +156,7 @@ class SudokuPy(App):
         # Erase any background colors left over
         self.clear_format()
         change = False
-        change, errorcode = solve.basic_check(self.sudoku, change)
+        change, errorcode = self.sudoku.basic_check(change)
 
         # If there is an error, immedately assign the proper error
         if errorcode == 1:
@@ -169,7 +168,7 @@ class SudokuPy(App):
 
         # If nothing changed, validate the answer
         if not change:
-            solved, error = solve.validate_answer(self.sudoku)
+            solved, error = self.sudoku.validate_answer()
             if solved:
                 self.on_complete()
                 self.smartsolve.cancel()
@@ -177,12 +176,10 @@ class SudokuPy(App):
                 self.textinput.text = 'ERROR: Double Assignment'
                 self.smartsolve.cancel()
             else:
-                change, errorcode = solve.intermediate_check(
-                    self.sudoku, change)
+                change, errorcode = self.sudoku.intermediate_check(change)
                 if not change:
-                    change, errorcode = solve.cross_check(self.sudoku, change)
-                    change, errorcode = solve.intermediate_check(
-                        self.sudoku, change)
+                    change, errorcode = self.sudoku.cross_check(change)
+                    change, errorcode = self.sudoku.intermediate_check(change)
                     if not change:
                         self.error_unsolved()
                         self.smartsolve.cancel()
@@ -204,7 +201,7 @@ class SudokuPy(App):
         self.textinput.text = 'ERROR: Double Assignment'
 
     def solve_backtrack(self, event):
-        
+
         if not self.solved:
 
             self.clear_format()
@@ -214,7 +211,7 @@ class SudokuPy(App):
             self.forward = True
             self.backtrack = Clock.schedule_interval(
                 self.backtrack_step, 0.0000001)
-        
+
         else:
             self.textinput.text = 'This is already solved, why would you want to solve again?'
 
@@ -226,7 +223,7 @@ class SudokuPy(App):
             self.backtrack.cancel()
         # If the backtrack is complete, check to see if it is solved
         elif self.backtrack_next == ('End', 'End'):
-            solved, _ = solve.validate_answer(self.sudoku)
+            solved, _ = self.sudoku.validate_answer(self.sudoku)
             if solved:
                 self.on_complete()
             else:
@@ -235,8 +232,7 @@ class SudokuPy(App):
             self.backtrack.cancel()
         else:
             self.backtrack_next, self.forward = backtrack.backtrack(
-                self.sudoku, self.backtrack_next, self.forward)
-
+                self.sudoku.sudoku, self.backtrack_next, self.forward)
 
     def manual_entry(self, cell):
         if self.entry != '':
@@ -250,7 +246,6 @@ class SudokuPy(App):
                         cell.color = [1, 1, 1, 1]
                 else:
                     self.textinput.text = 'Cell is original, cannot be manually changed'
-
 
             elif self.pencil:
                 if not cell.backend_cell.solved:
@@ -296,7 +291,7 @@ class SudokuPy(App):
 
             entry = utils.entry_generator(self.textinput.text)
 
-            for cell in utils.iter_box(self.sudoku):
+            for cell in utils.iter_box(self.sudoku.sudoku):
                 try:
                     _value = int(next(entry))
                 except:
@@ -335,7 +330,7 @@ class SudokuPy(App):
 
 if __name__ == '__main__':
 
-    blank = puzzle.build_sudoku(
+    blank = sudoku.Sudoku(
         "000000000000000000000000000000000000000000000000000000000000000000000000000000000")
 
     SudokuPy(blank).run()
