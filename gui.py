@@ -148,7 +148,7 @@ class SudokuPy(App):
 
         if not self.solved:
 
-            self.smartsolve = Clock.schedule_interval(self.solve_step, 0.1)
+            self.smartsolve = Clock.schedule_interval(self.solve_step, 0.00001)
 
         else:
             self.textinput.text = 'This is already solved, why would you want to solve again?'
