@@ -210,7 +210,7 @@ class SudokuPy(App):
             self.backtrack_next = (0, 0)
             self.forward = True
             self.backtrack = Clock.schedule_interval(
-                self.backtrack_step, 0.0000001)
+                self.backtrack_step, 0.001)
 
         else:
             self.textinput.text = 'This is already solved, why would you want to solve again?'
